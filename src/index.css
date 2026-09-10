@@ -1,0 +1,152 @@
+@import "tailwindcss";
+
+@theme {
+  --color-surface: #0f131b;
+  --color-surface-dim: #0f131b;
+  --color-surface-bright: #353941;
+  --color-surface-container-lowest: #0a0e15;
+  --color-surface-container-low: #181c23;
+  --color-surface-container: #1c2027;
+  --color-surface-container-high: #262a32;
+  --color-surface-container-highest: #31353d;
+  --color-surface-variant: #31353d;
+  --color-on-surface: #dfe2ed;
+  --color-on-surface-variant: #b9cacb;
+  --color-inverse-surface: #dfe2ed;
+  --color-inverse-on-surface: #2d3038;
+  --color-outline: #849495;
+  --color-outline-variant: #3b494b;
+  --color-surface-tint: #00dbe9;
+  --color-primary: #dbfcff;
+  --color-on-primary: #00363a;
+  --color-primary-container: #00f0ff;
+  --color-on-primary-container: #006970;
+  --color-inverse-primary: #006970;
+  --color-secondary: #4cd7f6;
+  --color-on-secondary: #003640;
+  --color-secondary-container: #03b5d3;
+  --color-on-secondary-container: #00424e;
+  --color-tertiary: #fff3ea;
+  --color-on-tertiary: #472a00;
+  --color-tertiary-container: #ffd19c;
+  --color-on-tertiary-container: #855300;
+  --color-error: #ffb4ab;
+  --color-on-error: #690005;
+  --color-error-container: #93000a;
+  --color-on-error-container: #ffdad6;
+  --color-primary-fixed: #7df4ff;
+  --color-primary-fixed-dim: #00dbe9;
+  --color-secondary-fixed: #acedff;
+  --color-secondary-fixed-dim: #4cd7f6;
+  --color-tertiary-fixed: #ffddb8;
+  --color-tertiary-fixed-dim: #ffb95f;
+  --color-background: #0f131b;
+  --color-on-background: #dfe2ed;
+
+  --font-body: 'Inter', sans-serif;
+  --font-code: 'JetBrains Mono', monospace;
+  --font-arabic: 'Cairo', 'Inter', sans-serif;
+}
+
+@layer utilities {
+  .font-headline-xl {
+    font-family: 'Inter', sans-serif;
+    font-size: 36px;
+    line-height: 44px;
+    letter-spacing: -0.02em;
+    font-weight: 700;
+  }
+  .font-display-lg {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 48px;
+    line-height: 52px;
+    letter-spacing: -0.04em;
+    font-weight: 700;
+  }
+  .font-headline-lg {
+    font-family: 'Inter', sans-serif;
+    font-size: 24px;
+    line-height: 32px;
+    letter-spacing: -0.01em;
+    font-weight: 600;
+  }
+  .font-headline-md {
+    font-family: 'Inter', sans-serif;
+    font-size: 20px;
+    line-height: 28px;
+    letter-spacing: 0em;
+    font-weight: 600;
+  }
+  .font-body-lg {
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    line-height: 24px;
+    font-weight: 400;
+  }
+  .font-body-md {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    line-height: 20px;
+    font-weight: 400;
+  }
+  .font-body-sm {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    line-height: 16px;
+    font-weight: 400;
+  }
+  .font-telemetry-value-lg {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 28px;
+    line-height: 32px;
+    letter-spacing: -0.02em;
+    font-weight: 700;
+  }
+  .font-telemetry-value-md {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 18px;
+    line-height: 24px;
+    letter-spacing: -0.01em;
+    font-weight: 600;
+  }
+  .font-telemetry-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    line-height: 14px;
+    letter-spacing: 0.08em;
+    font-weight: 500;
+  }
+  .font-code-sm {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    line-height: 16px;
+    font-weight: 400;
+  }
+}
+
+/* Custom scrollbar hiding and subtle styles */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #0a0e15;
+}
+::-webkit-scrollbar-thumb {
+  background: #262a32;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #00f0ff;
+}
+
+[dir="rtl"] {
+  font-family: 'Cairo', 'Inter', sans-serif;
+}
+[dir="rtl"] .font-code-sm,
+[dir="rtl"] .font-telemetry-label,
+[dir="rtl"] .font-telemetry-value-md,
+[dir="rtl"] .font-telemetry-value-lg {
+  font-family: 'JetBrains Mono', 'Cairo', monospace;
+}
+

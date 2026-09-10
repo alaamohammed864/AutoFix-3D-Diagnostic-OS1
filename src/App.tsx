@@ -1,0 +1,688 @@
+import React, { useState, useEffect } from 'react';
+import { Language, NavPath, VehicleSpec, MaintenanceItem } from './types';
+import { translations } from './data/translations';
+import { mockVehicles, maintenanceItems } from './data/mockVehicles';
+import { Sidebar } from './components/Sidebar';
+import { Header } from './components/Header';
+import { ThreeCanvas } from './components/ThreeCanvas';
+import { DtcInspector } from './components/DtcInspector';
+import { MaintenanceGrid } from './components/MaintenanceGrid';
+import { SubsystemMatrices } from './components/SubsystemMatrices';
+import { DiagnosticTreeModal } from './components/DiagnosticTreeModal';
+import { ObdLogModal } from './components/ObdLogModal';
+import { TorqueProcedureModal } from './components/TorqueProcedureModal';
+import { CommandPalette } from './components/CommandPalette';
+import { VideoGuideModal } from './components/VideoGuideModal';
+import { VinScannerModal } from './components/VinScannerModal';
+import { VehicleExplorer } from './components/VehicleExplorer';
+import { DiagnosticEngineWizard } from './components/diagnostic/DiagnosticEngineWizard';
+import { DtcModulePage } from './components/dtc/DtcModulePage';
+import { VehicleProfileData } from './db/vehicleTypes';
+import { VEHICLE_PROFILES } from './db/vehicleDatabase';
+
+export default function App() {
+  const [lang, setLang] = useState<Language>('en');
+  const [currentPath, setCurrentPath] = useState<NavPath>('dashboard');
+  const [currentVehicle, setCurrentVehicle] = useState<VehicleSpec>(mockVehicles.porsche992);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+
+  // Modals state
+  const [isDiagnosticTreeOpen, setIsDiagnosticTreeOpen] = useState(false);
+  const [isDiagnosticEngineOpen, setIsDiagnosticEngineOpen] = useState(false);
+  const [diagnosticInitialSymptom, setDiagnosticInitialSymptom] = useState<string | undefined>(undefined);
+  const [target3DComponentId, setTarget3DComponentId] = useState<string | null>(null);
+  const [isObdLogOpen, setIsObdLogOpen] = useState(false);
+  const [isTorqueModalOpen, setIsTorqueModalOpen] = useState(false);
+  const [selectedMaintenanceItem, setSelectedMaintenanceItem] = useState<MaintenanceItem | null>(null);
+  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
+  const [isVideoGuideOpen, setIsVideoGuideOpen] = useState(false);
+  const [isVinScannerOpen, setIsVinScannerOpen] = useState(false);
+
+  // Live telemetry stream rate simulation
+  const [streamRate, setStreamRate] = useState(20);
+  const [activeFaultCount, setActiveFaultCount] = useState(1);
+  const [activeVehicleProfile, setActiveVehicleProfile] = useState<VehicleProfileData>(VEHICLE_PROFILES[0]);
+
+  const t = translations[lang];
+
+  useEffect(() => {
+    // Small natural fluctuation on stream rate (19-21 Hz)
+    const interval = setInterval(() => {
+      setStreamRate(19 + Math.floor(Math.random() * 3));
+    }, 2500);
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleOpenProcedure = (item: MaintenanceItem) => {
+    setSelectedMaintenanceItem(item);
+    setIsTorqueModalOpen(true);
+  };
+
+  const handleCodeCleared = () => {
+    setActiveFaultCount(0);
+  };
+
+  const handleVehicleChange = (key: string) => {
+    if (mockVehicles[key]) {
+      setCurrentVehicle(mockVehicles[key]);
+    }
+  };
+
+  const handleLoadProfileToWorkshop = (profile: VehicleProfileData) => {
+    setActiveVehicleProfile(profile);
+    const spec: VehicleSpec = {
+      make: profile.make,
+      model: profile.model,
+      year: String(profile.year),
+      powertrain: profile.engine,
+      drivetrain: profile.driveType,
+      gearbox: profile.transmission,
+      displacement: profile.displacement,
+      engineOil: profile.fluids.find((f) => f.name.toLowerCase().includes('oil'))?.spec || '0W-16 / 0W-20',
+      sparkGap: '0.040 in (1.0 mm)',
+      wheelBoltTorque: profile.tires.wheelLugTorque,
+      vin: profile.vinExample,
+    };
+    setCurrentVehicle(spec);
+  };
+
+  return (
+    <div
+      dir={lang === 'ar' ? 'rtl' : 'ltr'}
+      className="min-h-screen bg-surface font-body-md text-body-md text-on-surface antialiased selection:bg-primary-container selection:text-on-primary-container"
+    >
+      {/* Fixed Sidebar */}
+      <Sidebar
+        currentPath={currentPath}
+        onNavigate={setCurrentPath}
+        lang={lang}
+        isOpenMobile={isMobileSidebarOpen}
+        onCloseMobile={() => setIsMobileSidebarOpen(false)}
+      />
+
+      {/* Main App Container */}
+      <div className="lg:ps-72 transition-all">
+        {/* Top App Header */}
+        <Header
+          lang={lang}
+          onToggleLang={setLang}
+          onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
+          onOpenMobileSidebar={() => setIsMobileSidebarOpen(true)}
+          onSwapVehicle={() => setIsVinScannerOpen(true)}
+        />
+
+        {/* Main Content Body */}
+        <main className="w-full pt-20 px-4 sm:px-6 pb-16 space-y-8 max-w-[1600px] mx-auto">
+          {/* TOP STATUS & STREAM TELEMETRY BAR */}
+          <section className="w-full flex flex-col xl:flex-row xl:items-center justify-between gap-4 bg-surface-container-lowest p-4 rounded-xl shadow-lg relative overflow-hidden border border-white/5">
+            <div className="absolute inset-y-0 start-0 w-1 bg-gradient-to-b from-primary-container via-secondary to-primary-fixed"></div>
+
+            <div className="flex flex-wrap items-center gap-4 sm:gap-6 ps-2">
+              <div className="flex items-center gap-3">
+                <span className="relative flex h-3 w-3">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-container opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-primary-container shadow-[0_0_8px_#00f0ff]"></span>
+                </span>
+                <div className="flex flex-col">
+                  <span className="font-telemetry-label text-telemetry-label text-outline uppercase tracking-wider">
+                    {t.interfaceBus}
+                  </span>
+                  <span className="font-code-sm text-code-sm text-on-surface font-semibold">
+                    ISO 15765-4 CAN (CAN-FD)
+                  </span>
+                </div>
+              </div>
+
+              <div className="h-6 w-px bg-surface-container-highest hidden sm:block"></div>
+
+              <div className="flex flex-col">
+                <span className="font-telemetry-label text-telemetry-label text-outline uppercase tracking-wider">
+                  {t.baudRate}
+                </span>
+                <span className="font-code-sm text-code-sm text-secondary font-medium">
+                  500 kbps • 8.2 MB/s
+                </span>
+              </div>
+
+              <div className="h-6 w-px bg-surface-container-highest hidden sm:block"></div>
+
+              <div className="flex flex-col">
+                <span className="font-telemetry-label text-telemetry-label text-outline uppercase tracking-wider">
+                  {t.ecuPolling}
+                </span>
+                <span className="font-code-sm text-code-sm text-on-surface">{t.allOk}</span>
+              </div>
+
+              <div className="h-6 w-px bg-surface-container-highest hidden sm:block"></div>
+
+              <div className="flex flex-col">
+                <span className="font-telemetry-label text-telemetry-label text-outline uppercase tracking-wider">
+                  {t.streamRate}
+                </span>
+                <div className="flex items-center gap-1.5">
+                  <span className="font-telemetry-value-md text-telemetry-value-md text-primary-container leading-none">
+                    {streamRate}
+                  </span>
+                  <span className="font-code-sm text-[10px] text-outline">Hz</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Tool Actions */}
+            <div className="flex items-center gap-3 self-end xl:self-auto">
+              <div className="inline-flex rounded-lg bg-surface-container-low p-0.5 border border-white/5">
+                <button
+                  onClick={() => setLang('en')}
+                  className={`px-3 py-1 text-xs font-code-sm font-semibold rounded transition-all cursor-pointer ${
+                    lang === 'en'
+                      ? 'bg-primary-container text-on-primary-container shadow-sm'
+                      : 'text-on-surface-variant hover:text-on-surface'
+                  }`}
+                  type="button"
+                >
+                  EN
+                </button>
+                <button
+                  onClick={() => setLang('ar')}
+                  className={`px-3 py-1 text-xs font-code-sm font-semibold rounded transition-all cursor-pointer ${
+                    lang === 'ar'
+                      ? 'bg-primary-container text-on-primary-container shadow-sm'
+                      : 'text-on-surface-variant hover:text-on-surface'
+                  }`}
+                  type="button"
+                >
+                  العربية
+                </button>
+              </div>
+
+              <button
+                onClick={() => setIsObdLogOpen(true)}
+                className="flex items-center gap-2 bg-surface-container hover:bg-surface-container-high text-primary-container px-3 py-1.5 rounded-lg font-code-sm text-xs transition-colors shadow-sm border border-white/5 cursor-pointer"
+                type="button"
+              >
+                <span className="material-symbols-outlined text-[16px]">terminal</span>
+                <span>{t.obdLog}</span>
+              </button>
+
+              <button
+                onClick={() => setIsVinScannerOpen(true)}
+                className="flex items-center gap-1.5 bg-surface-container-high hover:bg-surface-bright text-on-surface px-3 py-1.5 rounded-lg font-code-sm text-xs transition-colors border border-white/5 cursor-pointer"
+                type="button"
+              >
+                <span className="material-symbols-outlined text-[16px]">qr_code_scanner</span>
+                <span>{t.vinScan}</span>
+              </button>
+            </div>
+          </section>
+
+          {/* TOP PRIMARY NAVIGATION TABS (Dashboard vs. Vehicle Explorer vs. Diagnostic Engine) */}
+          <section className="flex flex-wrap items-center justify-between gap-2 p-2 bg-surface-container-lowest rounded-xl border border-white/5">
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                onClick={() => setCurrentPath('dashboard')}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-code-sm text-xs transition-all cursor-pointer ${
+                  currentPath === 'dashboard' || (!['vehicle-explorer', 'live-dtc-scanner', 'diagnostic-engine'].includes(currentPath))
+                    ? 'bg-primary-container text-on-primary-container font-bold shadow-[0_0_12px_rgba(0,240,255,0.25)]'
+                    : 'text-outline hover:text-on-surface hover:bg-surface-container-high'
+                }`}
+              >
+                <span className="material-symbols-outlined text-base">speed</span>
+                <span>{lang === 'ar' ? 'لوحة القياس والورشة 3D' : '3D Telemetry Dashboard'}</span>
+              </button>
+
+              <button
+                onClick={() => setCurrentPath('live-dtc-scanner')}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-code-sm text-xs transition-all cursor-pointer ${
+                  currentPath === 'live-dtc-scanner'
+                    ? 'bg-error-container text-on-error-container font-bold shadow-[0_0_12px_rgba(255,84,73,0.3)]'
+                    : 'text-outline hover:text-on-surface hover:bg-surface-container-high'
+                }`}
+              >
+                <span className="material-symbols-outlined text-base">warning</span>
+                <span>{lang === 'ar' ? 'فاحص الأعطال وترابط الأكواد' : 'OBD-II / DTC Suite'}</span>
+                <span className="bg-error-container/50 text-on-error-container px-1.5 py-0.5 rounded text-[10px] font-bold">
+                  DTC
+                </span>
+              </button>
+
+              <button
+                onClick={() => setCurrentPath('vehicle-explorer')}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-code-sm text-xs transition-all cursor-pointer ${
+                  currentPath === 'vehicle-explorer'
+                    ? 'bg-primary-container text-on-primary-container font-bold shadow-[0_0_12px_rgba(0,240,255,0.25)]'
+                    : 'text-outline hover:text-on-surface hover:bg-surface-container-high'
+                }`}
+              >
+                <span className="material-symbols-outlined text-base">directions_car</span>
+                <span>{lang === 'ar' ? 'مستكشف المركبات الذكي (7 خطوات)' : 'Vehicle Explorer & Profiles (7 Steps)'}</span>
+                <span className="bg-surface-container-high text-secondary px-1.5 py-0.5 rounded text-[10px] font-bold">
+                  Wizard
+                </span>
+              </button>
+
+              <button
+                onClick={() => {
+                  setDiagnosticInitialSymptom("Engine cranks but doesn't start");
+                  setIsDiagnosticEngineOpen(true);
+                }}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg font-code-sm text-xs transition-all cursor-pointer bg-surface-container-high hover:bg-primary-container hover:text-on-primary-container text-primary-container font-bold border border-primary-container/30 shadow-sm"
+              >
+                <span className="material-symbols-outlined text-base">account_tree</span>
+                <span>{lang === 'ar' ? 'محرك التشخيص الذكي' : 'Diagnostic Engine'}</span>
+                <span className="bg-primary-container/20 text-primary-container px-1.5 py-0.5 rounded text-[10px] font-bold uppercase">
+                  Flow
+                </span>
+              </button>
+            </div>
+
+            <div className="hidden sm:flex items-center gap-2 text-xs font-code-sm text-outline pe-2">
+              <span className="material-symbols-outlined text-sm text-secondary">verified</span>
+              <span>Active: {activeVehicleProfile.year} {activeVehicleProfile.make} {activeVehicleProfile.model}</span>
+            </div>
+          </section>
+
+          {/* VIEW ROUTING */}
+          {currentPath === 'live-dtc-scanner' ? (
+            <DtcModulePage
+              lang={lang}
+              onStartDiagnosis={(symptom, targetCompId) => {
+                setDiagnosticInitialSymptom(symptom);
+                if (targetCompId) setTarget3DComponentId(targetCompId);
+                setIsDiagnosticEngineOpen(true);
+              }}
+              onInspectIn3D={(componentId) => {
+                setTarget3DComponentId(componentId);
+                setCurrentPath('dashboard');
+                setTimeout(() => {
+                  window.scrollTo({ top: 380, behavior: 'smooth' });
+                }, 100);
+              }}
+            />
+          ) : currentPath === 'vehicle-explorer' ? (
+            <VehicleExplorer
+              lang={lang}
+              onSetAppVehicle={handleLoadProfileToWorkshop}
+              activeAppProfile={activeVehicleProfile}
+            />
+          ) : (
+            <>
+              {/* HERO SECTION */}
+              <section className="relative bg-surface-container-low rounded-xl p-6 lg:p-8 overflow-hidden shadow-xl border border-white/5">
+            <div className="absolute -top-24 -right-24 w-96 h-96 bg-primary-container/5 rounded-full blur-3xl pointer-events-none"></div>
+            <div className="absolute -bottom-24 -left-24 w-80 h-80 bg-secondary-container/5 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div className="relative z-10 flex flex-col lg:flex-row lg:items-end justify-between gap-6">
+              <div className="space-y-3 max-w-3xl">
+                <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded bg-surface-container-high text-primary-container font-code-sm text-[11px] tracking-widest uppercase border border-primary-container/20">
+                  <span className="h-1.5 w-1.5 rounded-full bg-primary-container animate-pulse"></span>
+                  {t.telemetryHeroTag}
+                </div>
+
+                <h1 className="font-display-lg text-headline-xl lg:text-display-lg text-on-surface font-extrabold tracking-tight uppercase">
+                  {t.sloganPart1}
+                  <span className="text-primary-container">.</span> {t.sloganPart2}
+                  <span className="text-secondary">.</span> {t.sloganPart3}
+                  <span className="text-primary-fixed">.</span>
+                </h1>
+
+                <p className="font-body-lg text-body-lg text-on-surface-variant leading-relaxed">
+                  {t.heroDescription}
+                </p>
+              </div>
+
+              {/* Quick Session Metric Strip */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 bg-surface-container-lowest/80 backdrop-blur-md p-4 rounded-xl min-w-[280px] border border-white/5">
+                <div className="flex flex-col">
+                  <span className="font-telemetry-label text-telemetry-label text-outline uppercase">
+                    {t.dtcAlert}
+                  </span>
+                  <span
+                    className={`font-telemetry-value-md text-telemetry-value-md flex items-center gap-1 ${
+                      activeFaultCount > 0 ? 'text-error' : 'text-secondary'
+                    }`}
+                  >
+                    <span className="material-symbols-outlined text-base">
+                      {activeFaultCount > 0 ? 'warning' : 'check_circle'}
+                    </span>
+                    {activeFaultCount > 0 ? t.faultCount : lang === 'ar' ? 'لا توجد أعطال' : '0 Faults'}
+                  </span>
+                </div>
+
+                <div className="flex flex-col">
+                  <span className="font-telemetry-label text-telemetry-label text-outline uppercase">
+                    {t.battery}
+                  </span>
+                  <span className="font-telemetry-value-md text-telemetry-value-md text-primary-container">
+                    14.4 V
+                  </span>
+                </div>
+
+                <div className="flex flex-col col-span-2 sm:col-span-1">
+                  <span className="font-telemetry-label text-telemetry-label text-outline uppercase">
+                    {t.coolant}
+                  </span>
+                  <span className="font-telemetry-value-md text-telemetry-value-md text-secondary">
+                    92°C
+                  </span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* DYNAMIC VEHICLE SELECTOR CARD (CASCADE FILTERS) */}
+          <section className="bg-surface-container-lowest rounded-xl p-5 lg:p-6 shadow-xl space-y-6 border border-white/5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-surface-container-high text-primary-container">
+                  <span className="material-symbols-outlined text-xl">tune</span>
+                </div>
+                <div>
+                  <h2 className="font-headline-lg text-headline-md sm:text-headline-lg text-on-surface font-semibold">
+                    {t.activeVehicleRig}
+                  </h2>
+                  <p className="font-code-sm text-code-sm text-outline">
+                    {t.gatewayCanId} • VIN: {currentVehicle.vin}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setIsVinScannerOpen(true)}
+                  className="px-3 py-1.5 rounded-lg bg-surface-container-high hover:bg-surface-bright text-on-surface font-code-sm text-xs transition-colors flex items-center gap-1 cursor-pointer"
+                  type="button"
+                >
+                  <span className="material-symbols-outlined text-sm">history</span> {t.recallSaved}
+                </button>
+                <button
+                  onClick={() => setCurrentVehicle(mockVehicles.porsche992)}
+                  className="px-3 py-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-outline hover:text-on-surface font-code-sm text-xs transition-colors cursor-pointer"
+                  type="button"
+                >
+                  {t.resetFilter}
+                </button>
+              </div>
+            </div>
+
+            {/* Cascade Controls */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
+              {/* Make Pill Filter */}
+              <div className="flex flex-col gap-1.5">
+                <label className="font-telemetry-label text-telemetry-label text-outline uppercase">
+                  {t.make}
+                </label>
+                <div className="relative">
+                  <select
+                    value={
+                      currentVehicle.make.includes('Porsche')
+                        ? 'porsche992'
+                        : currentVehicle.make.includes('BMW')
+                        ? 'bmwM3'
+                        : 'audiRs'
+                    }
+                    onChange={(e) => handleVehicleChange(e.target.value)}
+                    className="w-full bg-surface-container-low text-primary-container font-code-sm text-xs rounded-lg px-3 py-2.5 appearance-none focus:outline-none focus:bg-surface-container-high cursor-pointer font-semibold border border-white/5"
+                  >
+                    <option value="porsche992">Porsche (992)</option>
+                    <option value="bmwM3">BMW (G80/G82)</option>
+                    <option value="audiRs">Audi (B9 RS)</option>
+                  </select>
+                  <span className="material-symbols-outlined absolute end-2.5 top-2.5 text-primary-container pointer-events-none text-sm">
+                    expand_more
+                  </span>
+                </div>
+              </div>
+
+              {/* Model */}
+              <div className="flex flex-col gap-1.5">
+                <label className="font-telemetry-label text-telemetry-label text-outline uppercase">
+                  {t.model}
+                </label>
+                <div className="relative">
+                  <select className="w-full bg-surface-container-low text-on-surface font-code-sm text-xs rounded-lg px-3 py-2.5 appearance-none focus:outline-none focus:bg-surface-container-high cursor-pointer border border-white/5">
+                    <option>{currentVehicle.model}</option>
+                  </select>
+                  <span className="material-symbols-outlined absolute end-2.5 top-2.5 text-outline pointer-events-none text-sm">
+                    expand_more
+                  </span>
+                </div>
+              </div>
+
+              {/* Year */}
+              <div className="flex flex-col gap-1.5">
+                <label className="font-telemetry-label text-telemetry-label text-outline uppercase">
+                  {t.modelYear}
+                </label>
+                <div className="relative">
+                  <select className="w-full bg-surface-container-low text-on-surface font-code-sm text-xs rounded-lg px-3 py-2.5 appearance-none focus:outline-none focus:bg-surface-container-high cursor-pointer border border-white/5">
+                    <option>{currentVehicle.year}</option>
+                  </select>
+                  <span className="material-symbols-outlined absolute end-2.5 top-2.5 text-outline pointer-events-none text-sm">
+                    expand_more
+                  </span>
+                </div>
+              </div>
+
+              {/* Engine */}
+              <div className="flex flex-col gap-1.5">
+                <label className="font-telemetry-label text-telemetry-label text-outline uppercase">
+                  {t.powertrain}
+                </label>
+                <div className="relative">
+                  <select className="w-full bg-surface-container-low text-on-surface font-code-sm text-xs rounded-lg px-3 py-2.5 appearance-none focus:outline-none focus:bg-surface-container-high cursor-pointer border border-white/5">
+                    <option>{currentVehicle.powertrain}</option>
+                  </select>
+                  <span className="material-symbols-outlined absolute end-2.5 top-2.5 text-outline pointer-events-none text-sm">
+                    expand_more
+                  </span>
+                </div>
+              </div>
+
+              {/* Trim / Drivetrain */}
+              <div className="flex flex-col gap-1.5">
+                <label className="font-telemetry-label text-telemetry-label text-outline uppercase">
+                  {t.drivetrain}
+                </label>
+                <div className="relative">
+                  <select className="w-full bg-surface-container-low text-on-surface font-code-sm text-xs rounded-lg px-3 py-2.5 appearance-none focus:outline-none focus:bg-surface-container-high cursor-pointer border border-white/5">
+                    <option>{currentVehicle.drivetrain}</option>
+                  </select>
+                  <span className="material-symbols-outlined absolute end-2.5 top-2.5 text-outline pointer-events-none text-sm">
+                    expand_more
+                  </span>
+                </div>
+              </div>
+
+              {/* Transmission */}
+              <div className="flex flex-col gap-1.5">
+                <label className="font-telemetry-label text-telemetry-label text-outline uppercase">
+                  {t.gearbox}
+                </label>
+                <div className="relative">
+                  <select className="w-full bg-surface-container-low text-on-surface font-code-sm text-xs rounded-lg px-3 py-2.5 appearance-none focus:outline-none focus:bg-surface-container-high cursor-pointer border border-white/5">
+                    <option>{currentVehicle.gearbox}</option>
+                  </select>
+                  <span className="material-symbols-outlined absolute end-2.5 top-2.5 text-outline pointer-events-none text-sm">
+                    expand_more
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Spec Tag Strip & Workspace CTA */}
+            <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 pt-3 bg-surface-container-low/60 p-4 rounded-lg border border-white/5">
+              <div className="flex flex-wrap items-center gap-y-2 gap-x-4 font-code-sm text-xs text-on-surface-variant">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-outline">Displacement:</span>
+                  <span className="text-on-surface font-semibold">{currentVehicle.displacement}</span>
+                </div>
+                <span className="text-surface-container-highest">•</span>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-outline">Engine Oil:</span>
+                  <span className="text-primary font-semibold">{currentVehicle.engineOil}</span>
+                </div>
+                <span className="text-surface-container-highest">•</span>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-outline">Spark Gap:</span>
+                  <span className="text-on-surface font-semibold">{currentVehicle.sparkGap}</span>
+                </div>
+                <span className="text-surface-container-highest">•</span>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-outline">Wheel Bolt Torque:</span>
+                  <span className="text-secondary-fixed-dim font-semibold">
+                    {currentVehicle.wheelBoltTorque}
+                  </span>
+                </div>
+              </div>
+
+              <button
+                onClick={() => {
+                  setCurrentPath('3d-telemetry-cad');
+                  window.scrollTo({ top: 400, behavior: 'smooth' });
+                }}
+                className="bg-primary-container hover:bg-primary-fixed-dim text-on-primary-container px-5 py-2.5 rounded-lg font-code-sm text-xs font-bold transition-all shadow-[0_0_20px_rgba(0,240,255,0.35)] flex items-center justify-center gap-2 shrink-0 cursor-pointer"
+                type="button"
+              >
+                <span className="material-symbols-outlined text-base">rocket_launch</span>
+                <span>{t.openWorkspace}</span>
+              </button>
+            </div>
+          </section>
+
+          {/* 3D VEHICLE INTERACTIVE CAD WORKSPACE & LIVE TELEMETRY STACK */}
+          <section className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            {/* 3D CAD Center Viewport (8 Columns) */}
+            <div className="lg:col-span-8 flex flex-col space-y-4">
+              <ThreeCanvas
+                lang={lang}
+                initialSelectedComponentId={target3DComponentId}
+                onSelectDtc={() => {
+                  setDiagnosticInitialSymptom("Engine cranks but doesn't start");
+                  setIsDiagnosticEngineOpen(true);
+                }}
+                onOpenSensor={(name) => {
+                  setSelectedMaintenanceItem(maintenanceItems[1]);
+                  setIsTorqueModalOpen(true);
+                }}
+              />
+            </div>
+
+            {/* Active DTC Inspector & Freeze Frame (4 Columns) */}
+            <div className="lg:col-span-4 flex flex-col space-y-4">
+              <DtcInspector
+                lang={lang}
+                onOpenDtcSuite={() => setCurrentPath('live-dtc-scanner')}
+                onLaunchTree={() => {
+                  setDiagnosticInitialSymptom("Engine cranks but doesn't start");
+                  setIsDiagnosticEngineOpen(true);
+                }}
+                onInspect3d={() => {
+                  window.scrollTo({ top: 380, behavior: 'smooth' });
+                }}
+                onSyncVideo={() => setIsVideoGuideOpen(true)}
+              />
+            </div>
+          </section>
+
+          {/* MAINTENANCE DUE & FACTORY SCHEDULES GRID */}
+          <MaintenanceGrid
+            lang={lang}
+            items={maintenanceItems}
+            onOpenProcedure={handleOpenProcedure}
+          />
+
+          {/* INTERACTIVE SUBSYSTEMS OVERVIEW & COMPONENT DEEP-DIVES */}
+          <SubsystemMatrices lang={lang} />
+
+          {/* COMMAND PALETTE SHORTCUT & QUICK FOOTER BAR */}
+          <section className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-xl bg-surface-container-low text-xs font-code-sm text-outline border border-white/5">
+            <div
+              onClick={() => setIsCommandPaletteOpen(true)}
+              className="flex items-center gap-2 cursor-pointer hover:text-on-surface transition-colors"
+            >
+              <kbd className="px-2 py-1 bg-surface-container-high text-on-surface rounded font-bold shadow-sm">
+                ⌘K
+              </kbd>
+              <span>{t.commandPaletteNotice}</span>
+            </div>
+
+            <div className="flex items-center gap-4">
+              <span className="flex items-center gap-1.5 text-secondary">
+                <span className="h-2 w-2 rounded-full bg-secondary animate-pulse"></span>
+                {t.cloudTelemetryLive}
+              </span>
+              <span>{t.sessionId}</span>
+            </div>
+          </section>
+            </>
+          )}
+        </main>
+      </div>
+
+      {/* Global Interactive Modals */}
+      <DiagnosticEngineWizard
+        lang={lang}
+        currentVehicle={currentVehicle}
+        isOpen={isDiagnosticEngineOpen}
+        onClose={() => setIsDiagnosticEngineOpen(false)}
+        initialSymptom={diagnosticInitialSymptom}
+        onInspectIn3D={(componentId) => {
+          setTarget3DComponentId(componentId);
+          setIsDiagnosticEngineOpen(false);
+          setCurrentPath('dashboard');
+          setTimeout(() => {
+            window.scrollTo({ top: 380, behavior: 'smooth' });
+          }, 100);
+        }}
+      />
+
+      <DiagnosticTreeModal
+        isOpen={isDiagnosticTreeOpen}
+        onClose={() => setIsDiagnosticTreeOpen(false)}
+        lang={lang}
+        onCodeCleared={handleCodeCleared}
+      />
+
+      <ObdLogModal
+        isOpen={isObdLogOpen}
+        onClose={() => setIsObdLogOpen(false)}
+        lang={lang}
+      />
+
+      <TorqueProcedureModal
+        item={selectedMaintenanceItem}
+        onClose={() => setIsTorqueModalOpen(false)}
+        lang={lang}
+      />
+
+      <CommandPalette
+        isOpen={isCommandPaletteOpen}
+        onClose={() => setIsCommandPaletteOpen(false)}
+        lang={lang}
+        onNavigate={setCurrentPath}
+        onOpenDiagnosticTree={() => {
+          setDiagnosticInitialSymptom("Engine cranks but doesn't start");
+          setIsDiagnosticEngineOpen(true);
+        }}
+        onOpenObdLog={() => setIsObdLogOpen(true)}
+        onSelectVehicleProfile={(profile) => {
+          handleLoadProfileToWorkshop(profile);
+          setCurrentPath('vehicle-explorer');
+        }}
+      />
+
+      <VideoGuideModal
+        isOpen={isVideoGuideOpen}
+        onClose={() => setIsVideoGuideOpen(false)}
+        lang={lang}
+      />
+
+      <VinScannerModal
+        isOpen={isVinScannerOpen}
+        onClose={() => setIsVinScannerOpen(false)}
+        lang={lang}
+        onSelectVehicle={(veh) => setCurrentVehicle(veh)}
+      />
+    </div>
+  );
+}

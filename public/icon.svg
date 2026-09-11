@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f131b"/>
+      <stop offset="100%" stop-color="#191e2b"/>
+    </linearGradient>
+    <linearGradient id="cyanGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00f0ff"/>
+      <stop offset="100%" stop-color="#0090a8"/>
+    </linearGradient>
+    <linearGradient id="amberGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fbbf24"/>
+      <stop offset="100%" stop-color="#d97706"/>
+    </linearGradient>
+  </defs>
+  <!-- App Background -->
+  <rect width="512" height="512" rx="128" fill="url(#bgGrad)" />
+  <rect width="504" height="504" x="4" y="4" rx="124" fill="none" stroke="#00f0ff" stroke-width="4" stroke-opacity="0.2" />
+
+  <!-- 3D Diagnostic Vehicle Blueprint Grid -->
+  <path d="M 64 256 L 448 256 M 256 64 L 256 448" stroke="#ffffff" stroke-opacity="0.06" stroke-width="2" stroke-dasharray="8 8" />
+
+  <!-- Car Silhouette / Telemetry Chassis -->
+  <g transform="translate(56, 120) scale(0.78)">
+    <path d="M 60 260 C 90 260 110 200 160 200 L 350 200 C 400 200 420 260 450 260 L 480 260 C 495 260 500 270 500 290 L 500 340 C 500 355 490 365 475 365 L 440 365 C 435 325 395 295 350 295 C 305 295 265 325 260 365 L 180 365 C 175 325 135 295 90 295 C 45 295 5 325 0 365 L -10 365 C -25 365 -35 355 -35 340 L -35 290 C -35 270 -20 260 0 260 Z" fill="none" stroke="url(#cyanGrad)" stroke-width="14" stroke-linejoin="round" stroke-linecap="round"/>
+    
+    <!-- Cabin Roof Line -->
+    <path d="M 120 200 L 180 90 C 195 65 220 60 250 60 L 330 60 C 360 60 380 75 400 105 L 440 200 Z" fill="none" stroke="#ffffff" stroke-width="12" stroke-opacity="0.7" stroke-linecap="round"/>
+    
+    <!-- Wheels -->
+    <circle cx="90" cy="365" r="42" fill="#0f131b" stroke="url(#cyanGrad)" stroke-width="10"/>
+    <circle cx="90" cy="365" r="16" fill="url(#cyanGrad)"/>
+    <circle cx="350" cy="365" r="42" fill="#0f131b" stroke="url(#cyanGrad)" stroke-width="10"/>
+    <circle cx="350" cy="365" r="16" fill="url(#cyanGrad)"/>
+
+    <!-- Diagnostic Hexagon Pulse -->
+    <polygon points="256,120 286,137 286,172 256,189 226,172 226,137" fill="none" stroke="url(#amberGrad)" stroke-width="6"/>
+    <circle cx="256" cy="155" r="7" fill="#fbbf24"/>
+  </g>
+
+  <!-- PWA Offline Badge Accent -->
+  <g transform="translate(370, 70)">
+    <circle cx="30" cy="30" r="30" fill="#00f0ff" fill-opacity="0.15" stroke="#00f0ff" stroke-width="3"/>
+    <path d="M 22 30 L 28 36 L 40 24" fill="none" stroke="#00f0ff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>

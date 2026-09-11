@@ -11,6 +11,11 @@ import { Language } from '../../types';
 import { RealisticVehicleModel } from './RealisticVehicleModel';
 import { SystemExplorerBar, ALL_SYSTEMS } from './SystemExplorerBar';
 import { ComponentInspectionDrawer } from './ComponentInspectionDrawer';
+import {
+  LODMode,
+  ModelOptimizationStats,
+  Telemetry3DManager,
+} from './ModelOptimizationPipeline';
 
 interface Vehicle3DVisualizationProps {
   lang: Language;
@@ -38,6 +43,17 @@ export const Vehicle3DVisualization: React.FC<Vehicle3DVisualizationProps> = ({
   const [measureMode, setMeasureMode] = useState<boolean>(false);
   const [isAutoRotating, setIsAutoRotating] = useState<boolean>(false);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
+  const [lodMode, setLodMode] = useState<LODMode>('auto');
+  const [optStats, setOptStats] = useState<ModelOptimizationStats>(
+    Telemetry3DManager.getInstance().currentStats
+  );
+
+  useEffect(() => {
+    const unsub = Telemetry3DManager.getInstance().subscribe((stats) => {
+      setOptStats(stats);
+    });
+    return unsub;
+  }, []);
 
   // Sync if initialSelectedComponentId changes
   useEffect(() => {
@@ -173,8 +189,34 @@ export const Vehicle3DVisualization: React.FC<Vehicle3DVisualizationProps> = ({
           </span>
         </div>
 
-        {/* Active Mode Indicators (Top Right) */}
-        <div className="absolute top-3 right-3 z-10 pointer-events-none flex items-center gap-1.5 flex-wrap">
+        {/* Active Mode Indicators & 3D Optimization Telemetry (Top Right) */}
+        <div className="absolute top-3 right-3 z-10 pointer-events-auto flex items-center gap-1.5 flex-wrap justify-end max-w-sm">
+          {/* LOD Mode Selector Pill */}
+          <div className="flex items-center rounded-lg bg-surface-container-lowest/80 backdrop-blur-md border border-white/10 p-0.5 text-[10px] font-code-sm">
+            <span className="px-1.5 text-outline font-bold">LOD:</span>
+            {(['auto', 'low', 'medium', 'high'] as LODMode[]).map((mode) => (
+              <button
+                key={mode}
+                onClick={() => setLodMode(mode)}
+                className={`px-1.5 py-0.5 rounded capitalize font-bold transition-all cursor-pointer ${
+                  lodMode === mode
+                    ? 'bg-primary-container text-on-primary-container shadow-sm'
+                    : 'text-outline hover:text-on-surface'
+                }`}
+              >
+                {mode === 'auto' ? 'Auto' : mode === 'medium' ? 'Med' : mode}
+              </button>
+            ))}
+          </div>
+
+          {/* Draco & Compression Telemetry Pill */}
+          <div className="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-surface-container-lowest/80 backdrop-blur-md border border-white/10 text-[10px] font-code-sm text-cyan-300">
+            <span className="material-symbols-outlined text-xs text-primary-container">compress</span>
+            <span className="font-semibold">DRACO 4.8:1</span>
+            <span className="text-outline">|</span>
+            <span className="text-on-surface">{optStats.triangleCount.toLocaleString()} ▲</span>
+          </div>
+
           {explodedLevel > 0 && (
             <span className="px-2 py-0.5 rounded bg-primary-container/20 text-primary-container border border-primary-container/30 text-[10px] font-code-sm font-bold uppercase">
               Exploded {Math.round(explodedLevel * 100)}%
@@ -230,7 +272,7 @@ export const Vehicle3DVisualization: React.FC<Vehicle3DVisualizationProps> = ({
             position={[0, -0.5, 0]}
           />
 
-          {/* Interactive Vehicle Rig */}
+          {/* Interactive Vehicle Rig with Progressive LOD */}
           <RealisticVehicleModel
             selectedComponentId={selectedComponentId}
             onSelectComponent={(comp) => setSelectedComponentId(comp.id)}
@@ -240,6 +282,7 @@ export const Vehicle3DVisualization: React.FC<Vehicle3DVisualizationProps> = ({
             transparentMode={transparentMode}
             showLabels={showLabels}
             measureMode={measureMode}
+            lodMode={lodMode}
           />
 
           {/* Camera Orbit Controls */}

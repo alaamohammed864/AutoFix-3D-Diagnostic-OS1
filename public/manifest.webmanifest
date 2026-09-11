@@ -1,0 +1,48 @@
+{
+  "name": "AutoFix 3D Diagnostic OS",
+  "short_name": "AutoFix 3D",
+  "description": "Interactive 3D automotive telemetry, guided diagnostic trees, and offline workshop intelligence with factory repair specifications.",
+  "start_url": "/",
+  "id": "/",
+  "display": "standalone",
+  "background_color": "#0f131b",
+  "theme_color": "#0f131b",
+  "orientation": "any",
+  "dir": "auto",
+  "lang": "en",
+  "categories": ["utilities", "productivity", "automotive"],
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Quick DTC Inspector",
+      "short_name": "DTCs",
+      "description": "Inspect OBD-II and OEM trouble codes",
+      "url": "/?tab=explorer"
+    },
+    {
+      "name": "3D Telemetry Studio",
+      "short_name": "3D Studio",
+      "description": "Examine vehicle subsystems in real-time 3D",
+      "url": "/?tab=chassis"
+    },
+    {
+      "name": "Offline Maintenance Records",
+      "short_name": "Maintenance",
+      "description": "View verified offline service schedules",
+      "url": "/?tab=maintenance"
+    }
+  ]
+}

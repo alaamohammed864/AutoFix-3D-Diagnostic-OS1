@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Html, Line } from '@react-three/drei';
 import * as THREE from 'three';
@@ -7,6 +7,12 @@ import {
   AutomotiveSystem,
   ComponentDetail,
 } from '../../db/componentDatabase';
+import {
+  LODMode,
+  LODLevel,
+  LOD_STATS_PRESETS,
+  Telemetry3DManager,
+} from './ModelOptimizationPipeline';
 
 interface RealisticVehicleModelProps {
   selectedComponentId: string | null;
@@ -17,6 +23,7 @@ interface RealisticVehicleModelProps {
   transparentMode: boolean;
   showLabels: boolean;
   measureMode: boolean;
+  lodMode?: LODMode;
 }
 
 export const RealisticVehicleModel: React.FC<RealisticVehicleModelProps> = ({
@@ -28,15 +35,47 @@ export const RealisticVehicleModel: React.FC<RealisticVehicleModelProps> = ({
   transparentMode,
   showLabels,
   measureMode,
+  lodMode = 'auto',
 }) => {
   const pulseRef = useRef<number>(0);
+  const [activeLOD, setActiveLOD] = useState<LODLevel>('low');
+  const lastLODRef = useRef<LODLevel>('low');
+
   const selectedComponent = selectedComponentId
     ? AUTOMOTIVE_COMPONENTS[selectedComponentId]
     : null;
   const relatedIds = selectedComponent ? selectedComponent.relatedComponentIds : [];
 
-  useFrame((_, delta) => {
+  useFrame((state, delta) => {
     pulseRef.current += delta * 4;
+
+    // Camera distance-based LOD calculation (LOD 0 = low, LOD 1 = medium, LOD 2 = high)
+    let computedLOD: LODLevel;
+    if (lodMode === 'auto') {
+      const dist = state.camera.position.length();
+      if (selectedComponentId) {
+        computedLOD = 'high'; // Focus inspection requires full detail
+      } else if (dist > 8.0) {
+        computedLOD = 'low'; // Low poly bounding when zoomed out
+      } else if (dist > 5.2) {
+        computedLOD = 'medium';
+      } else {
+        computedLOD = 'high';
+      }
+    } else {
+      computedLOD = lodMode;
+    }
+
+    if (computedLOD !== lastLODRef.current) {
+      lastLODRef.current = computedLOD;
+      setActiveLOD(computedLOD);
+      const preset = LOD_STATS_PRESETS[computedLOD];
+      Telemetry3DManager.getInstance().updateStats({
+        lodLevel: computedLOD,
+        triangleCount: preset.triangles,
+        meshCount: preset.meshes,
+      });
+    }
   });
 
   // Material and highlight calculator
@@ -726,21 +765,37 @@ export const RealisticVehicleModel: React.FC<RealisticVehicleModelProps> = ({
             <group key={i} position={getComponentPos(corner.pos, corner.offset)}>
               {/* Outer Rubber Tire */}
               <mesh rotation={[0, 0, Math.PI / 2]} castShadow>
-                <cylinderGeometry args={[0.34, 0.34, 0.24, 28]} />
+                <cylinderGeometry
+                  args={[
+                    0.34,
+                    0.34,
+                    0.24,
+                    activeLOD === 'low' ? 12 : activeLOD === 'medium' ? 18 : 28,
+                  ]}
+                />
                 <meshStandardMaterial {...getHighlightProps('wheels', '#090d16', 0.98)} />
               </mesh>
 
               {/* Inner Forged Alloy Rim */}
               <mesh rotation={[0, 0, Math.PI / 2]}>
-                <cylinderGeometry args={[0.26, 0.26, 0.25, 24]} />
+                <cylinderGeometry
+                  args={[
+                    0.26,
+                    0.26,
+                    0.25,
+                    activeLOD === 'low' ? 8 : activeLOD === 'medium' ? 14 : 24,
+                  ]}
+                />
                 <meshStandardMaterial {...getHighlightProps('wheels', '#cbd5e1')} />
               </mesh>
 
-              {/* Center Lock Nut */}
-              <mesh position={[corner.pos[0] > 0 ? 0.13 : -0.13, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
-                <cylinderGeometry args={[0.06, 0.06, 0.05, 12]} />
-                <meshStandardMaterial {...getHighlightProps('wheels', '#ef4444')} />
-              </mesh>
+              {/* Center Lock Nut - Omitted in low LOD */}
+              {activeLOD !== 'low' && (
+                <mesh position={[corner.pos[0] > 0 ? 0.13 : -0.13, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
+                  <cylinderGeometry args={[0.06, 0.06, 0.05, activeLOD === 'medium' ? 8 : 12]} />
+                  <meshStandardMaterial {...getHighlightProps('wheels', '#ef4444')} />
+                </mesh>
+              )}
             </group>
           ))}
         </group>

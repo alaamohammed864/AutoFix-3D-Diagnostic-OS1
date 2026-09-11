@@ -17,8 +17,17 @@ import { VinScannerModal } from './components/VinScannerModal';
 import { VehicleExplorer } from './components/VehicleExplorer';
 import { DiagnosticEngineWizard } from './components/diagnostic/DiagnosticEngineWizard';
 import { DtcModulePage } from './components/dtc/DtcModulePage';
+import { MaintenanceCenterPage } from './components/maintenance/MaintenanceCenterPage';
+import { RepairCenterPage } from './components/repair/RepairCenterPage';
+import { AdminDataImportPage } from './components/admin/AdminDataImportPage';
 import { VehicleProfileData } from './db/vehicleTypes';
 import { VEHICLE_PROFILES } from './db/vehicleDatabase';
+import { AutoFixAiView } from './ai/AutoFixAiView';
+import { AutoFixAiModal } from './ai/AutoFixAiModal';
+import { AutoFixAiFloatingButton } from './ai/AutoFixAiFloatingButton';
+import { WorkshopWorkstation } from './workshop/WorkshopWorkstation';
+import { AutomotiveCalculatorsPage } from './tools/AutomotiveCalculatorsPage';
+import { ElectricalExplorerPage } from './electrical/ElectricalExplorerPage';
 
 export default function App() {
   const [lang, setLang] = useState<Language>('en');
@@ -37,6 +46,7 @@ export default function App() {
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [isVideoGuideOpen, setIsVideoGuideOpen] = useState(false);
   const [isVinScannerOpen, setIsVinScannerOpen] = useState(false);
+  const [isAiModalOpen, setIsAiModalOpen] = useState(false);
 
   // Live telemetry stream rate simulation
   const [streamRate, setStreamRate] = useState(20);
@@ -109,6 +119,7 @@ export default function App() {
           onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
           onOpenMobileSidebar={() => setIsMobileSidebarOpen(true)}
           onSwapVehicle={() => setIsVinScannerOpen(true)}
+          onOpenAiAssistant={() => setIsAiModalOpen(true)}
         />
 
         {/* Main Content Body */}
@@ -221,13 +232,30 @@ export default function App() {
               <button
                 onClick={() => setCurrentPath('dashboard')}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg font-code-sm text-xs transition-all cursor-pointer ${
-                  currentPath === 'dashboard' || (!['vehicle-explorer', 'live-dtc-scanner', 'diagnostic-engine'].includes(currentPath))
+                  currentPath === 'dashboard'
                     ? 'bg-primary-container text-on-primary-container font-bold shadow-[0_0_12px_rgba(0,240,255,0.25)]'
                     : 'text-outline hover:text-on-surface hover:bg-surface-container-high'
                 }`}
               >
                 <span className="material-symbols-outlined text-base">speed</span>
                 <span>{lang === 'ar' ? 'لوحة القياس والورشة 3D' : '3D Telemetry Dashboard'}</span>
+              </button>
+
+              <button
+                onClick={() => setCurrentPath('workshop-mode')}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-code-sm text-xs transition-all cursor-pointer ${
+                  currentPath === 'workshop-mode'
+                    ? 'bg-cyan-500 text-neutral-950 font-bold shadow-[0_0_15px_rgba(0,240,255,0.4)]'
+                    : 'bg-surface-container-high text-cyan-300 hover:text-on-surface hover:bg-surface-bright border border-cyan-500/30'
+                }`}
+              >
+                <span className="material-symbols-outlined text-base">precision_manufacturing</span>
+                <span>{lang === 'ar' ? 'وضع ورشة الصيانة' : 'Workshop Mode'}</span>
+                <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold uppercase ${
+                  currentPath === 'workshop-mode' ? 'bg-black/20 text-neutral-950' : 'bg-cyan-500/20 text-cyan-300'
+                }`}>
+                  STATION
+                </span>
               </button>
 
               <button
@@ -273,6 +301,55 @@ export default function App() {
                   Flow
                 </span>
               </button>
+
+              <button
+                onClick={() => setCurrentPath('autofix-ai')}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-code-sm text-xs transition-all cursor-pointer ${
+                  currentPath === 'autofix-ai'
+                    ? 'bg-primary-container text-on-primary-container font-bold shadow-[0_0_12px_rgba(0,240,255,0.25)]'
+                    : 'text-primary-container hover:text-on-surface hover:bg-surface-container-high border border-primary-container/30'
+                }`}
+              >
+                <span className="material-symbols-outlined text-base animate-pulse">auto_awesome</span>
+                <span>AutoFix AI</span>
+                <span className="bg-primary-container/20 text-primary-container px-1.5 py-0.5 rounded text-[10px] font-bold uppercase">
+                  COPILOT
+                </span>
+              </button>
+
+              <button
+                onClick={() => setCurrentPath('tools-torque')}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-code-sm text-xs transition-all cursor-pointer ${
+                  currentPath === 'tools-torque'
+                    ? 'bg-amber-500 text-neutral-950 font-bold shadow-[0_0_12px_rgba(245,158,11,0.35)]'
+                    : 'text-amber-300 hover:text-on-surface hover:bg-surface-container-high border border-amber-500/30'
+                }`}
+              >
+                <span className="material-symbols-outlined text-base">calculate</span>
+                <span>{lang === 'ar' ? 'أدوات وحاسبات السيارات' : 'Calculators & Tools'}</span>
+                <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold uppercase ${
+                  currentPath === 'tools-torque' ? 'bg-black/20 text-neutral-950' : 'bg-amber-500/20 text-amber-300'
+                }`}>
+                  13
+                </span>
+              </button>
+
+              <button
+                onClick={() => setCurrentPath('electrical-wiring')}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-code-sm text-xs transition-all cursor-pointer ${
+                  currentPath === 'electrical-wiring'
+                    ? 'bg-amber-400 text-neutral-950 font-bold shadow-[0_0_12px_rgba(251,191,36,0.35)]'
+                    : 'text-amber-300 hover:text-on-surface hover:bg-surface-container-high border border-amber-400/30'
+                }`}
+              >
+                <span className="material-symbols-outlined text-base">schema</span>
+                <span>{lang === 'ar' ? 'مستكشف الدوائر والأسلاك' : 'Electrical Wiring'}</span>
+                <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold uppercase ${
+                  currentPath === 'electrical-wiring' ? 'bg-black/20 text-neutral-950' : 'bg-amber-400/20 text-amber-300'
+                }`}>
+                  10 SYS
+                </span>
+              </button>
             </div>
 
             <div className="hidden sm:flex items-center gap-2 text-xs font-code-sm text-outline pe-2">
@@ -282,7 +359,46 @@ export default function App() {
           </section>
 
           {/* VIEW ROUTING */}
-          {currentPath === 'live-dtc-scanner' ? (
+          {currentPath === 'electrical-wiring' ? (
+            <ElectricalExplorerPage
+              currentVehicle={activeVehicleProfile}
+              onSelectVehicle={(prof) => handleLoadProfileToWorkshop(prof)}
+              lang={lang}
+            />
+          ) : currentPath === 'workshop-mode' ? (
+            <WorkshopWorkstation
+              lang={lang}
+              activeVehicleProfile={activeVehicleProfile}
+              onSelectVehicleProfile={(prof) => handleLoadProfileToWorkshop(prof)}
+              onNavigateTo3D={() => setCurrentPath('dashboard')}
+              onNavigateToRepair={() => setCurrentPath('repair-guides')}
+              onNavigateToScanner={() => setCurrentPath('live-dtc-scanner')}
+              onNavigateToTools={() => setCurrentPath('tools-torque')}
+              onNavigateToElectrical={() => setCurrentPath('electrical-wiring')}
+            />
+          ) : currentPath === 'autofix-ai' ? (
+            <AutoFixAiView
+              lang={lang}
+              activeVehicle={activeVehicleProfile}
+              onSelectVehicleProfile={(prof) => handleLoadProfileToWorkshop(prof)}
+              onNavigateToProcedure={() => setCurrentPath('repair-guides')}
+            />
+          ) : currentPath === 'tools-torque' ? (
+            <AutomotiveCalculatorsPage lang={lang} />
+          ) : currentPath === 'data-import' || currentPath === 'system-settings' ? (
+            <AdminDataImportPage
+              lang={lang}
+              onNavigateToRepair={() => setCurrentPath('repair-guides')}
+            />
+          ) : currentPath === 'repair-guides' ? (
+            <RepairCenterPage lang={lang} />
+          ) : currentPath === 'service-schedules' ? (
+            <MaintenanceCenterPage
+              lang={lang}
+              activeVehicleId={activeVehicleProfile.id}
+              onSetWorkshopVehicle={handleLoadProfileToWorkshop}
+            />
+          ) : currentPath === 'live-dtc-scanner' ? (
             <DtcModulePage
               lang={lang}
               onStartDiagnosis={(symptom, targetCompId) => {
@@ -297,6 +413,7 @@ export default function App() {
                   window.scrollTo({ top: 380, behavior: 'smooth' });
                 }, 100);
               }}
+              onNavigateToRepair={() => setCurrentPath('repair-guides')}
             />
           ) : currentPath === 'vehicle-explorer' ? (
             <VehicleExplorer
@@ -589,6 +706,7 @@ export default function App() {
             lang={lang}
             items={maintenanceItems}
             onOpenProcedure={handleOpenProcedure}
+            onOpenMaintenanceCenter={() => setCurrentPath('service-schedules')}
           />
 
           {/* INTERACTIVE SUBSYSTEMS OVERVIEW & COMPONENT DEEP-DIVES */}
@@ -682,6 +800,22 @@ export default function App() {
         onClose={() => setIsVinScannerOpen(false)}
         lang={lang}
         onSelectVehicle={(veh) => setCurrentVehicle(veh)}
+      />
+
+      {/* AutoFix AI Floating Quick-Launcher Button */}
+      <AutoFixAiFloatingButton
+        isOpen={isAiModalOpen || currentPath === 'autofix-ai'}
+        onClick={() => setIsAiModalOpen(true)}
+      />
+
+      {/* AutoFix AI Modal Assistant */}
+      <AutoFixAiModal
+        isOpen={isAiModalOpen}
+        onClose={() => setIsAiModalOpen(false)}
+        lang={lang}
+        activeVehicle={activeVehicleProfile}
+        onSelectVehicleProfile={(profile) => handleLoadProfileToWorkshop(profile)}
+        onNavigateToProcedure={() => setCurrentPath('repair-guides')}
       />
     </div>
   );

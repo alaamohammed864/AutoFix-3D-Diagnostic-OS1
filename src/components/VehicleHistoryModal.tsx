@@ -25,7 +25,7 @@ export const VehicleHistoryModal: React.FC<VehicleHistoryModalProps> = ({
   const [newTitle, setNewTitle] = useState('');
   const [newCategory, setNewCategory] = useState('Engine Oil');
   const [newOdometer, setNewOdometer] = useState('45500');
-  const [newTech, setNewTech] = useState('Alex Vance (Master Tech)');
+  const [newTech, setNewTech] = useState('alaa Mohammed (Lead Developer)');
   const [newNotes, setNewNotes] = useState('');
 
   if (!isOpen) return null;

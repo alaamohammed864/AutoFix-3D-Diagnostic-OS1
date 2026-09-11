@@ -3,6 +3,9 @@ import { Language } from '../types';
 import { VehicleProfileData, KnownMaintenanceTask } from '../db/vehicleTypes';
 import { TAXONOMY, VEHICLE_PROFILES, getVehicleProfileById } from '../db/vehicleDatabase';
 import { parseAndExecuteNaturalSearch } from '../db/fuzzySearch';
+import { isArabicText } from '../search/terminologyMap';
+import { useVoiceSearch } from '../search/useVoiceSearch';
+import { VoiceSearchButton } from '../search/VoiceSearchButton';
 import { VehicleCompareModal } from './VehicleCompareModal';
 import { VehicleHistoryModal } from './VehicleHistoryModal';
 import { Vehicle3DVisualization } from './vehicle3d/Vehicle3DVisualization';
@@ -79,6 +82,17 @@ export const VehicleExplorer: React.FC<VehicleExplorerProps> = ({
 
   // Natural Search Execution
   const searchResults = parseAndExecuteNaturalSearch(searchQuery);
+  const isSearchArabic = isArabicText(searchQuery);
+  const isSearchRtl = isAr || isSearchArabic;
+
+  // Voice Search Hook
+  const voice = useVoiceSearch({
+    lang,
+    onResult: (transcript) => {
+      setSearchQuery(transcript);
+      setActiveSearchTab('search');
+    },
+  });
 
   const handleSaveVehicle = () => {
     if (!savedVehicleIds.includes(activeProfile.id)) {
@@ -124,8 +138,14 @@ export const VehicleExplorer: React.FC<VehicleExplorerProps> = ({
           {/* Quick preset chips requested by prompt */}
           <div className="flex items-center gap-1.5 flex-wrap">
             <span className="text-[10px] font-telemetry-label text-outline uppercase me-1">
-              {isAr ? 'أمثلة سريعة:' : 'Query Presets:'}
+              {isAr ? 'أمثلة مطابقة:' : 'Query Presets:'}
             </span>
+            <button
+              onClick={() => handlePresetSearch('تغيير بطارية تويوتا كامري 2018')}
+              className="text-[11px] font-code-sm px-2.5 py-1 rounded-lg bg-surface-container hover:bg-surface-container-high text-amber-300 border border-amber-400/20 transition-colors cursor-pointer"
+            >
+              "تغيير بطارية تويوتا كامري 2018"
+            </button>
             <button
               onClick={() => handlePresetSearch('Toyota Camry 2018 battery replacement')}
               className="text-[11px] font-code-sm px-2.5 py-1 rounded-lg bg-surface-container hover:bg-surface-container-high text-primary-container border border-primary-container/20 transition-colors cursor-pointer"
@@ -133,23 +153,23 @@ export const VehicleExplorer: React.FC<VehicleExplorerProps> = ({
               "Toyota Camry 2018 battery replacement"
             </button>
             <button
-              onClick={() => handlePresetSearch('Ford F-150 2019 coolant')}
+              onClick={() => handlePresetSearch('مضخة الوقود')}
               className="text-[11px] font-code-sm px-2.5 py-1 rounded-lg bg-surface-container hover:bg-surface-container-high text-secondary border border-secondary/20 transition-colors cursor-pointer"
             >
-              "Ford F-150 2019 coolant"
+              "مضخة الوقود"
             </button>
             <button
-              onClick={() => handlePresetSearch('Honda Civic 2017 brake light')}
+              onClick={() => handlePresetSearch('Ford F-150 2019 coolant')}
               className="text-[11px] font-code-sm px-2.5 py-1 rounded-lg bg-surface-container hover:bg-surface-container-high text-primary-fixed border border-primary-fixed/20 transition-colors cursor-pointer"
             >
-              "Honda Civic 2017 brake light"
+              "Ford F-150 2019 coolant"
             </button>
           </div>
         </div>
 
-        {/* Input box */}
-        <div className="relative">
-          <span className="material-symbols-outlined absolute start-3.5 top-3 text-outline text-xl">
+        {/* Input box with Voice Search and RTL support */}
+        <div dir={isSearchRtl ? 'rtl' : 'ltr'} className="relative flex items-center">
+          <span className="material-symbols-outlined absolute start-3.5 text-outline text-xl pointer-events-none">
             manage_search
           </span>
           <input
@@ -162,20 +182,53 @@ export const VehicleExplorer: React.FC<VehicleExplorerProps> = ({
             }}
             placeholder={
               isAr
-                ? 'اكتب طلبك باللغة الطبيعية (مثال: Toyota Camry 2018 battery replacement أو Ford F-150 coolant)'
-                : 'Enter natural language search (e.g. "Toyota Camry 2018 battery replacement", "Ford F-150 2019 coolant")'
+                ? 'اكتب طلبك بالعربية أو الإنجليزية (مثال: تغيير بطارية تويوتا كامري 2018 أو Ford F-150 coolant)'
+                : 'Enter natural language search (e.g. "Toyota Camry 2018 battery replacement", "تغيير بطارية تويوتا كامري 2018")'
             }
             className="w-full bg-surface-container-low text-on-surface text-sm font-code-sm ps-11 pe-24 py-2.5 rounded-xl border border-white/10 focus:outline-none focus:border-primary-container transition-all"
           />
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery('')}
-              className="absolute end-3 top-2.5 text-xs font-code-sm text-outline hover:text-on-surface px-2 py-0.5 rounded bg-surface-container"
-            >
-              Clear
-            </button>
-          )}
+
+          <div className="absolute end-2 flex items-center gap-1.5">
+            <VoiceSearchButton
+              isListening={voice.isListening}
+              isSupported={voice.isSupported}
+              lang={lang}
+              onClick={() => voice.toggleListening()}
+              size="sm"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="text-xs font-code-sm text-outline hover:text-on-surface px-2 py-1 rounded bg-surface-container cursor-pointer"
+              >
+                Clear
+              </button>
+            )}
+          </div>
         </div>
+
+        {/* Voice Listening Notice */}
+        {voice.isListening && (
+          <div className="bg-rose-500/10 border border-rose-500/20 px-3.5 py-2 rounded-xl flex items-center justify-between text-xs font-code-sm text-rose-300 animate-pulse">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>
+              <span>
+                {isAr
+                  ? 'جاري الاستماع لصوتك باللغة العربية... تحدث الآن'
+                  : 'Listening to your voice in automotive terms... Speak now'}
+              </span>
+            </div>
+            {voice.interimTranscript && (
+              <span className="italic text-white font-mono">"{voice.interimTranscript}"</span>
+            )}
+            <button
+              onClick={() => voice.stopListening()}
+              className="text-xs underline hover:text-white cursor-pointer"
+            >
+              {isAr ? 'إيقاف' : 'Stop'}
+            </button>
+          </div>
+        )}
 
         {/* DETECTED SEMANTIC ENTITIES CHIPS (Make, Model, Year, System, Component, Repair Action) */}
         {searchQuery.trim().length > 0 && (
@@ -193,13 +246,13 @@ export const VehicleExplorer: React.FC<VehicleExplorerProps> = ({
               {searchResults.detected.make && (
                 <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-primary-container/15 text-primary-container font-semibold border border-primary-container/30">
                   <span className="text-[10px] text-outline uppercase font-normal">Make:</span>
-                  {searchResults.detected.make}
+                  {searchResults.detectedAr?.make && isAr ? searchResults.detectedAr.make : searchResults.detected.make}
                 </span>
               )}
               {searchResults.detected.model && (
                 <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-secondary/15 text-secondary font-semibold border border-secondary/30">
                   <span className="text-[10px] text-outline uppercase font-normal">Model:</span>
-                  {searchResults.detected.model}
+                  {searchResults.detectedAr?.model && isAr ? searchResults.detectedAr.model : searchResults.detected.model}
                 </span>
               )}
               {searchResults.detected.year && (
@@ -211,19 +264,19 @@ export const VehicleExplorer: React.FC<VehicleExplorerProps> = ({
               {searchResults.detected.system && (
                 <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-surface-container-high text-on-surface font-semibold border border-white/10">
                   <span className="text-[10px] text-outline uppercase font-normal">System:</span>
-                  {searchResults.detected.system}
+                  {searchResults.detectedAr?.system && isAr ? searchResults.detectedAr.system : searchResults.detected.system}
                 </span>
               )}
               {searchResults.detected.component && (
                 <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-tertiary-container/20 text-tertiary-container font-semibold border border-tertiary-container/30">
                   <span className="text-[10px] text-outline uppercase font-normal">Component:</span>
-                  {searchResults.detected.component}
+                  {searchResults.detectedAr?.component && isAr ? searchResults.detectedAr.component : searchResults.detected.component}
                 </span>
               )}
               {searchResults.detected.repairAction && (
                 <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-error-container/20 text-error font-semibold border border-error-container/30">
                   <span className="text-[10px] text-outline uppercase font-normal">Action:</span>
-                  {searchResults.detected.repairAction}
+                  {searchResults.detectedAr?.repairAction && isAr ? searchResults.detectedAr.repairAction : searchResults.detected.repairAction}
                 </span>
               )}
             </div>
@@ -248,6 +301,80 @@ export const VehicleExplorer: React.FC<VehicleExplorerProps> = ({
                   <span>{isAr ? 'فتح ملف هذه المركبة' : 'Open Vehicle Profile'}</span>
                   <span className="material-symbols-outlined text-sm">arrow_forward</span>
                 </button>
+              </div>
+            )}
+
+            {/* Matched Battery Specification (e.g. for "تغيير بطارية تويوتا كامري 2018" or "Toyota Camry 2018 battery replacement") */}
+            {searchResults.matchedBattery && (
+              <div className="p-3 rounded-xl bg-amber-400/10 border border-amber-400/30 text-xs font-code-sm space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-amber-300 font-bold">
+                    <span className="material-symbols-outlined text-base">battery_charging_full</span>
+                    <span>{isAr ? 'مواصفات بطارية المصنع الأصلية (OEM Spec):' : 'OEM Verified Battery Specification:'}</span>
+                  </div>
+                  <span className="px-2 py-0.5 rounded bg-amber-400/20 text-amber-300 font-bold text-[10px]">
+                    {searchResults.matchedBattery.battery.groupSize}
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] text-on-surface">
+                  <div className="bg-surface-container-high/60 p-2 rounded-lg">
+                    <span className="text-[10px] text-outline block uppercase">{isAr ? 'المقاس (BCI):' : 'Group Size:'}</span>
+                    <span className="font-bold text-amber-300">{searchResults.matchedBattery.battery.groupSize}</span>
+                  </div>
+                  <div className="bg-surface-container-high/60 p-2 rounded-lg">
+                    <span className="text-[10px] text-outline block uppercase">{isAr ? 'تيار التدوير (CCA):' : 'Cold Cranking Amps:'}</span>
+                    <span className="font-bold text-primary-container">{searchResults.matchedBattery.battery.cca} CCA</span>
+                  </div>
+                  <div className="bg-surface-container-high/60 p-2 rounded-lg">
+                    <span className="text-[10px] text-outline block uppercase">{isAr ? 'الجهد / السعة:' : 'Voltage / Capacity:'}</span>
+                    <span className="font-bold text-secondary">{searchResults.matchedBattery.battery.voltage} • {searchResults.matchedBattery.battery.reserveCapacityMinutes} Min RC</span>
+                  </div>
+                  <div className="bg-surface-container-high/60 p-2 rounded-lg">
+                    <span className="text-[10px] text-outline block uppercase">{isAr ? 'نوع الكيمياء / OEM:' : 'Chemistry / OEM:'}</span>
+                    <span className="font-bold text-on-surface">{searchResults.matchedBattery.battery.chemistry}</span>
+                  </div>
+                </div>
+                <div className="text-[11px] text-outline flex items-center justify-between">
+                  <span>OEM Part: <strong className="text-on-surface">{searchResults.matchedBattery.battery.partNumberOEM}</strong></span>
+                  <span>{isAr ? 'استبدال موصى به:' : 'Rec. Replacement:'} {searchResults.matchedBattery.battery.recommendedReplacementYears} {isAr ? 'سنوات' : 'Years'}</span>
+                </div>
+              </div>
+            )}
+
+            {/* Matched Maintenance Procedures & Tasks */}
+            {searchResults.matchedTasks.length > 0 && (
+              <div className="space-y-2 pt-2 border-t border-white/5">
+                <span className="text-[11px] font-code-sm text-outline uppercase font-telemetry-label">
+                  {isAr ? 'إجراءات الصيانة المطابقة:' : 'Matching Maintenance Procedures:'}
+                </span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {searchResults.matchedTasks.map((t) => (
+                    <div
+                      key={t.id}
+                      className="p-2.5 rounded-xl bg-surface-container-high border border-white/5 flex items-center justify-between gap-2"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <span className="text-xs font-code-sm font-semibold text-on-surface truncate block">
+                          {t.title}
+                        </span>
+                        <span className="text-[10px] font-code-sm text-outline">
+                          {t.component} • {t.estimatedLaborHours}h Labor • {t.difficulty}
+                        </span>
+                      </div>
+                      <button
+                        onClick={() => {
+                          if (searchResults.matchedVehicle) {
+                            setActiveProfile(searchResults.matchedVehicle);
+                          }
+                          setSelectedTaskModal(t);
+                        }}
+                        className="px-2.5 py-1 rounded-lg bg-surface-container hover:bg-surface-bright text-xs font-code-sm text-primary-container border border-primary-container/30 shrink-0 cursor-pointer"
+                      >
+                        {isAr ? 'عرض الإجراء' : 'View Procedure'}
+                      </button>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </div>

@@ -75,6 +75,24 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </a>
 
           <a
+            className={navItemClass('workshop-mode')}
+            onClick={() => {
+              onNavigate('workshop-mode');
+              onCloseMobile();
+            }}
+          >
+            <div className="flex items-center gap-2.5">
+              <span className="material-symbols-outlined text-[18px] text-cyan-400">precision_manufacturing</span>
+              <span className="font-body-md font-semibold text-cyan-400">
+                {lang === 'ar' ? 'وضع ورشة الصيانة' : 'Workshop Mode'}
+              </span>
+            </div>
+            <span className="bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 px-1.5 py-0.5 rounded text-[9px] font-code-sm font-bold shadow-[0_0_8px_rgba(0,240,255,0.3)]">
+              STATION
+            </span>
+          </a>
+
+          <a
             className={navItemClass('vehicle-explorer')}
             onClick={() => {
               onNavigate('vehicle-explorer');
@@ -85,6 +103,22 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <span className="material-symbols-outlined text-[18px]">directions_car</span>
               <span className="font-body-md">{t.vehicleExplorer}</span>
             </div>
+          </a>
+
+          <a
+            className={navItemClass('autofix-ai')}
+            onClick={() => {
+              onNavigate('autofix-ai');
+              onCloseMobile();
+            }}
+          >
+            <div className="flex items-center gap-2.5">
+              <span className="material-symbols-outlined text-[18px] text-primary-container animate-pulse">auto_awesome</span>
+              <span className="font-body-md font-semibold text-primary-container">AutoFix AI</span>
+            </div>
+            <span className="bg-primary-container/20 text-primary-container border border-primary-container/30 px-1.5 py-0.5 rounded text-[9px] font-code-sm font-bold shadow-[0_0_8px_rgba(0,240,255,0.3)]">
+              AI COPILOT
+            </span>
           </a>
 
           <a
@@ -203,9 +237,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
             }}
           >
             <div className="flex items-center gap-2.5">
-              <span className="material-symbols-outlined text-[18px]">schema</span>
-              <span className="font-body-md">{t.electricalWiring}</span>
+              <span className="material-symbols-outlined text-[18px] text-amber-400">schema</span>
+              <span className="font-body-md font-semibold text-amber-300">{t.electricalWiring}</span>
             </div>
+            <span className="bg-amber-400/20 text-amber-300 border border-amber-400/30 px-1.5 py-0.5 rounded text-[9px] font-code-sm font-bold shadow-[0_0_8px_rgba(251,191,36,0.2)]">
+              10 SYS
+            </span>
           </a>
 
           <a
@@ -277,9 +314,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
             }}
           >
             <div className="flex items-center gap-2.5">
-              <span className="material-symbols-outlined text-[18px]">build</span>
-              <span className="font-body-md">{t.toolsTorque}</span>
+              <span className="material-symbols-outlined text-[18px] text-amber-400">calculate</span>
+              <span className="font-body-md font-semibold text-on-surface">
+                {lang === 'ar' ? 'أدوات وحاسبات السيارات' : 'Tools & Calculators'}
+              </span>
             </div>
+            <span className="bg-amber-500/20 text-amber-300 border border-amber-500/30 px-1.5 py-0.5 rounded text-[9px] font-code-sm font-bold">
+              13 TOOLS
+            </span>
           </a>
 
           <a
@@ -299,9 +341,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       {/* Offline Database & Settings */}
       <div className="p-3 bg-surface-container-lowest/80 flex flex-col gap-2 border-t border-white/5">
-        <div className="p-2.5 bg-surface-container-low rounded-lg flex flex-col gap-1 border border-white/5">
+        <div
+          onClick={() => {
+            onNavigate('data-import');
+            onCloseMobile();
+          }}
+          className="p-2.5 bg-surface-container-low hover:bg-surface-container-high rounded-lg flex flex-col gap-1 border border-white/5 cursor-pointer transition-colors group"
+        >
           <div className="flex items-center justify-between">
-            <span className="font-telemetry-label text-[10px] text-outline uppercase">
+            <span className="font-telemetry-label text-[10px] text-outline uppercase group-hover:text-primary-container transition-colors">
               {t.offlineDb}
             </span>
             <span className="inline-flex items-center gap-1 font-code-sm text-[10px] text-secondary-container">
@@ -314,10 +362,34 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
         <a
           onClick={() => {
+            onNavigate('data-import');
+            onCloseMobile();
+          }}
+          className={`flex items-center justify-between px-3 py-2 rounded-lg transition-colors cursor-pointer text-xs ${
+            currentPath === 'data-import'
+              ? 'bg-primary-container text-on-primary-container font-semibold shadow-[0_0_12px_rgba(0,240,255,0.25)]'
+              : 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'
+          }`}
+        >
+          <div className="flex items-center gap-2.5">
+            <span className="material-symbols-outlined text-[18px]">cloud_sync</span>
+            <span className="font-body-md">{t.adminDataImport}</span>
+          </div>
+          <span className="px-1.5 py-0.2 rounded bg-secondary-container/20 text-secondary text-[9px] font-code-sm font-bold">
+            KIOSK
+          </span>
+        </a>
+
+        <a
+          onClick={() => {
             onNavigate('system-settings');
             onCloseMobile();
           }}
-          className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors cursor-pointer text-xs"
+          className={`flex items-center gap-2.5 px-3 py-2 rounded-lg transition-colors cursor-pointer text-xs ${
+            currentPath === 'system-settings'
+              ? 'bg-primary-container text-on-primary-container font-semibold shadow-[0_0_12px_rgba(0,240,255,0.25)]'
+              : 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'
+          }`}
         >
           <span className="material-symbols-outlined text-[18px]">tune</span>
           <span className="font-body-md">{t.systemSettings}</span>

@@ -97,7 +97,16 @@ export interface TaxonomyStepOption {
 
 export interface NaturalSearchParsedResult {
   rawQuery: string;
+  detectedLanguage?: 'ar' | 'en';
   detected: {
+    make?: string;
+    model?: string;
+    year?: number;
+    system?: string;
+    component?: string;
+    repairAction?: string;
+  };
+  detectedAr?: {
     make?: string;
     model?: string;
     year?: number;

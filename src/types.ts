@@ -2,7 +2,9 @@ export type Language = 'en' | 'ar';
 
 export type NavPath =
   | 'dashboard'
+  | 'workshop-mode'
   | 'vehicle-explorer'
+  | 'autofix-ai'
   | 'diagnostic-engine'
   | '3d-telemetry-cad'
   | 'live-dtc-scanner'
@@ -17,7 +19,8 @@ export type NavPath =
   | 'fluid-specs'
   | 'tools-torque'
   | 'parts-catalog'
-  | 'system-settings';
+  | 'system-settings'
+  | 'data-import';
 
 export interface VehicleSpec {
   make: string;

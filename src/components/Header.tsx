@@ -8,6 +8,7 @@ interface HeaderProps {
   onOpenCommandPalette: () => void;
   onOpenMobileSidebar: () => void;
   onSwapVehicle: () => void;
+  onOpenAiAssistant?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -16,8 +17,10 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenCommandPalette,
   onOpenMobileSidebar,
   onSwapVehicle,
+  onOpenAiAssistant,
 }) => {
   const t = translations[lang];
+  const isAr = lang === 'ar';
 
   return (
     <header className="fixed top-0 start-0 lg:start-72 end-0 h-16 bg-surface/85 backdrop-blur-xl z-30 flex items-center justify-between px-4 lg:px-6 shadow-[0_1px_8px_rgba(0,0,0,0.4)] border-b border-white/5">
@@ -62,24 +65,43 @@ export const Header: React.FC<HeaderProps> = ({
 
       {/* Right side items */}
       <div className="flex items-center gap-3">
-        {/* Search input with ⌘K */}
+        {/* Search input with ⌘K & Voice indicator */}
         <div
           onClick={onOpenCommandPalette}
           className="relative flex items-center cursor-pointer group"
+          title={isAr ? 'البحث الذكي الصوتي والنصي (عربي / English)' : 'Multilingual Smart Search & Voice (English / Arabic)'}
         >
           <span className="material-symbols-outlined absolute start-3 text-outline text-[16px] group-hover:text-primary transition-colors">
             search
           </span>
           <input
             readOnly
-            className="bg-surface-container-lowest text-on-surface text-body-sm font-code-sm rounded-lg ps-9 pe-12 py-1.5 w-44 sm:w-64 focus:outline-none ring-1 ring-white/10 group-hover:ring-primary-container/50 text-xs placeholder:text-outline-variant cursor-pointer transition-all"
-            placeholder={t.searchPlaceholder}
+            className="bg-surface-container-lowest text-on-surface text-body-sm font-code-sm rounded-lg ps-9 pe-16 py-1.5 w-48 sm:w-64 focus:outline-none ring-1 ring-white/10 group-hover:ring-primary-container/50 text-xs placeholder:text-outline-variant cursor-pointer transition-all"
+            placeholder={isAr ? 'بحث عربي / EN أو صوتي...' : 'Search EN / عربي or voice...'}
             type="text"
           />
-          <span className="absolute end-2 font-code-sm text-[10px] bg-surface-container-high px-1.5 py-0.5 rounded text-outline group-hover:text-on-surface">
-            ⌘K
-          </span>
+          <div className="absolute end-2 flex items-center gap-1">
+            <span className="material-symbols-outlined text-outline group-hover:text-primary text-[14px]">
+              mic
+            </span>
+            <span className="font-code-sm text-[10px] bg-surface-container-high px-1.5 py-0.5 rounded text-outline group-hover:text-on-surface">
+              ⌘K
+            </span>
+          </div>
         </div>
+
+        {/* AutoFix AI Trigger */}
+        {onOpenAiAssistant && (
+          <button
+            onClick={onOpenAiAssistant}
+            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg bg-surface-container-low hover:bg-surface-container-high text-primary-container border border-primary-container/30 font-code-sm text-xs font-semibold transition-all hover:shadow-[0_0_12px_rgba(0,240,255,0.25)] cursor-pointer"
+            type="button"
+            title="Launch AutoFix AI Diagnostic Assistant"
+          >
+            <span className="material-symbols-outlined text-[16px] animate-pulse">auto_awesome</span>
+            <span className="hidden sm:inline">AutoFix AI</span>
+          </button>
+        )}
 
         {/* CAN-BUS Online Live Beacon */}
         <div className="hidden lg:flex items-center gap-2 bg-surface-container-lowest px-2.5 py-1.5 rounded-lg border border-white/5">
@@ -134,14 +156,14 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         </div>
 
-        {/* Technician profile */}
+        {/* Developer / Technician profile */}
         <div className="flex items-center gap-2 ps-1">
           <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center shadow-[0_0_8px_rgba(0,240,255,0.3)]">
             <span className="material-symbols-outlined text-on-primary text-[18px]">person</span>
           </div>
           <div className="hidden md:flex flex-col text-start">
             <span className="font-body-sm font-semibold text-on-surface leading-none text-xs">
-              Alex Vance
+              alaa Mohammed
             </span>
             <span className="font-telemetry-label text-secondary leading-tight text-[10px]">
               {t.masterTech}

@@ -14,12 +14,14 @@ interface DtcModulePageProps {
   lang: Language;
   onStartDiagnosis: (initialSymptom: string, targetComponentId?: string) => void;
   onInspectIn3D?: (componentId: string) => void;
+  onNavigateToRepair?: () => void;
 }
 
 export const DtcModulePage: React.FC<DtcModulePageProps> = ({
   lang,
   onStartDiagnosis,
   onInspectIn3D,
+  onNavigateToRepair,
 }) => {
   // Active entered codes state (default to user's example P0301 + P0171)
   const [activeCodes, setActiveCodes] = useState<string[]>(['P0301', 'P0171']);
@@ -577,6 +579,17 @@ export const DtcModulePage: React.FC<DtcModulePageProps> = ({
                     </div>
                   ))}
                 </div>
+
+                {onNavigateToRepair && (
+                  <button
+                    type="button"
+                    onClick={onNavigateToRepair}
+                    className="w-full py-2 px-3 rounded-lg bg-primary-container/15 hover:bg-primary-container/25 border border-primary-container/30 text-primary-container text-xs font-code-sm font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                  >
+                    <span className="material-symbols-outlined text-sm">menu_book</span>
+                    <span>{lang === 'ar' ? 'فتح مركز الإصلاح المعتمد' : 'Open Repair Procedures'}</span>
+                  </button>
+                )}
               </div>
             </div>
           </div>

@@ -6,12 +6,14 @@ interface MaintenanceGridProps {
   lang: Language;
   items: MaintenanceItem[];
   onOpenProcedure: (item: MaintenanceItem) => void;
+  onOpenMaintenanceCenter?: () => void;
 }
 
 export const MaintenanceGrid: React.FC<MaintenanceGridProps> = ({
   lang,
   items,
   onOpenProcedure,
+  onOpenMaintenanceCenter,
 }) => {
   const t = translations[lang];
 
@@ -30,24 +32,37 @@ export const MaintenanceGrid: React.FC<MaintenanceGridProps> = ({
           <p className="font-code-sm text-code-sm text-outline mt-1">{t.factoryInterval}</p>
         </div>
 
-        {/* Mileage Progress Readout */}
-        <div className="flex items-center gap-4 bg-surface-container-low px-4 py-3 rounded-xl border border-white/5">
-          <div className="flex flex-col">
-            <span className="font-telemetry-label text-telemetry-label text-outline uppercase">
-              {t.currentOdometer}
-            </span>
-            <span className="font-telemetry-value-md text-telemetry-value-md text-on-surface">
-              45,000 <span className="text-xs text-outline font-normal">mi</span>
-            </span>
-          </div>
-          <div className="h-8 w-px bg-surface-container-highest"></div>
-          <div className="flex flex-col">
-            <span className="font-telemetry-label text-telemetry-label text-outline uppercase">
-              {t.nextMajorInspection}
-            </span>
-            <span className="font-telemetry-value-md text-telemetry-value-md text-secondary">
-              {t.inMiles}
-            </span>
+        {/* Action button and Mileage Progress Readout */}
+        <div className="flex flex-wrap items-center gap-3">
+          {onOpenMaintenanceCenter && (
+            <button
+              onClick={onOpenMaintenanceCenter}
+              className="px-4 py-2.5 rounded-xl bg-primary-container/20 hover:bg-primary-container text-primary-container hover:text-on-primary-container border border-primary-container/30 font-bold font-code-sm text-xs transition-all shadow-[0_0_12px_rgba(0,240,255,0.2)] flex items-center gap-1.5 cursor-pointer"
+              type="button"
+            >
+              <span className="material-symbols-outlined text-base">construction</span>
+              <span>{lang === 'ar' ? 'مركز الصيانة وحساب دورة الحياة' : 'Full Maintenance Center & Timeline'}</span>
+            </button>
+          )}
+
+          <div className="flex items-center gap-4 bg-surface-container-low px-4 py-2.5 rounded-xl border border-white/5">
+            <div className="flex flex-col">
+              <span className="font-telemetry-label text-telemetry-label text-outline uppercase">
+                {t.currentOdometer}
+              </span>
+              <span className="font-telemetry-value-md text-telemetry-value-md text-on-surface">
+                45,000 <span className="text-xs text-outline font-normal">mi</span>
+              </span>
+            </div>
+            <div className="h-8 w-px bg-surface-container-highest"></div>
+            <div className="flex flex-col">
+              <span className="font-telemetry-label text-telemetry-label text-outline uppercase">
+                {t.nextMajorInspection}
+              </span>
+              <span className="font-telemetry-value-md text-telemetry-value-md text-secondary">
+                {t.inMiles}
+              </span>
+            </div>
           </div>
         </div>
       </div>

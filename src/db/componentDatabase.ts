@@ -727,3 +727,6 @@ export const AUTOMOTIVE_COMPONENTS: Record<string, ComponentDetail> = {
     explodedOffset: [0.0, 0.7, 0.5],
   },
 };
+
+export type VehicleComponent = ComponentDetail;
+export const COMPONENT_DATABASE = AUTOMOTIVE_COMPONENTS;

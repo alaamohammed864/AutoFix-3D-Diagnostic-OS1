@@ -110,3 +110,6 @@ export interface TimelineIntervalStatusResult {
   completedOdometer?: number;
   categoriesStatus: { category: MaintenanceCategory; isCompleted: boolean }[];
 }
+
+export type MaintenanceTask = ComprehensiveServiceRecord;
+export type MaintenanceSchedule = any;

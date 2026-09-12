@@ -77,6 +77,7 @@ export interface VehicleProfileData {
   fuelType: 'Gasoline 87 Octane' | 'Gasoline 91+ Premium' | 'Flex Fuel E85' | 'Diesel' | 'Hybrid';
   driveType: 'FWD' | 'RWD' | 'AWD' | '4WD';
   vinExample: string;
+  vin?: string;
   image: string;
   model3DAsset?: string;
   curbWeightLbs: number;
@@ -87,6 +88,8 @@ export interface VehicleProfileData {
   knownMaintenanceTasks: KnownMaintenanceTask[];
   history: ServiceHistoryRecord[];
 }
+
+export type VehicleProfile = VehicleProfileData;
 
 export interface TaxonomyStepOption {
   value: string;

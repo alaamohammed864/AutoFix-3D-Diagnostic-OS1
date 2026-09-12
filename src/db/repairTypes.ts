@@ -89,6 +89,8 @@ export interface RepairProcedure {
   relatedProcedures: RelatedProcedure[];
   tags: string[];
   vehicleId?: string;
+  applicableVehicleIds?: string[];
+  category?: string;
 }
 
 export interface ProblemReport {

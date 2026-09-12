@@ -28,12 +28,19 @@ import { AutoFixAiFloatingButton } from './ai/AutoFixAiFloatingButton';
 import { WorkshopWorkstation } from './workshop/WorkshopWorkstation';
 import { AutomotiveCalculatorsPage } from './tools/AutomotiveCalculatorsPage';
 import { ElectricalExplorerPage } from './electrical/ElectricalExplorerPage';
+import { AdminDashboard } from './components/admin/AdminDashboard';
+import { SecurityHubModal } from './components/security/SecurityHubModal';
+import { NotFoundView } from './components/common/NotFoundView';
+import { InternalServerErrorView } from './components/common/InternalServerErrorView';
+import { OfflineState } from './components/common/OfflineState';
 
 export default function App() {
   const [lang, setLang] = useState<Language>('en');
   const [currentPath, setCurrentPath] = useState<NavPath>('dashboard');
   const [currentVehicle, setCurrentVehicle] = useState<VehicleSpec>(mockVehicles.porsche992);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [isSecurityHubOpen, setIsSecurityHubOpen] = useState(false);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
 
   // Modals state
   const [isDiagnosticTreeOpen, setIsDiagnosticTreeOpen] = useState(false);
@@ -54,6 +61,18 @@ export default function App() {
   const [activeVehicleProfile, setActiveVehicleProfile] = useState<VehicleProfileData>(VEHICLE_PROFILES[0]);
 
   const t = translations[lang];
+
+  // Online / Offline monitor
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   useEffect(() => {
     // Small natural fluctuation on stream rate (19-21 Hz)
@@ -96,6 +115,73 @@ export default function App() {
     setCurrentVehicle(spec);
   };
 
+  const handleNavigate = (path: NavPath) => {
+    if (path === 'security-hub') {
+      setIsSecurityHubOpen(true);
+      return;
+    }
+    if (path === 'diagnostic-engine') {
+      setIsDiagnosticEngineOpen(true);
+      return;
+    }
+    if (path === 'powertrain-engine') {
+      setTarget3DComponentId('engine-block');
+      setCurrentPath('dashboard');
+      setTimeout(() => {
+        window.scrollTo({ top: 380, behavior: 'smooth' });
+      }, 100);
+      return;
+    }
+    if (path === 'transmission-pdk') {
+      setTarget3DComponentId('transmission-pdk');
+      setCurrentPath('dashboard');
+      setTimeout(() => {
+        window.scrollTo({ top: 380, behavior: 'smooth' });
+      }, 100);
+      return;
+    }
+    if (path === 'braking-abs') {
+      setTarget3DComponentId('brake-caliper-fl');
+      setCurrentPath('dashboard');
+      setTimeout(() => {
+        window.scrollTo({ top: 380, behavior: 'smooth' });
+      }, 100);
+      return;
+    }
+    if (path === 'thermal-cooling') {
+      setTarget3DComponentId('radiator-core');
+      setCurrentPath('dashboard');
+      setTimeout(() => {
+        window.scrollTo({ top: 380, behavior: 'smooth' });
+      }, 100);
+      return;
+    }
+    if (path === 'suspension-steering') {
+      setTarget3DComponentId('strut-fl');
+      setCurrentPath('dashboard');
+      setTimeout(() => {
+        window.scrollTo({ top: 380, behavior: 'smooth' });
+      }, 100);
+      return;
+    }
+    if (path === 'fluid-specs') {
+      setCurrentPath('service-schedules');
+      return;
+    }
+    if (path === 'parts-catalog') {
+      setCurrentPath('repair-guides');
+      return;
+    }
+    if (path === '3d-telemetry-cad') {
+      setCurrentPath('dashboard');
+      setTimeout(() => {
+        window.scrollTo({ top: 380, behavior: 'smooth' });
+      }, 100);
+      return;
+    }
+    setCurrentPath(path);
+  };
+
   return (
     <div
       dir={lang === 'ar' ? 'rtl' : 'ltr'}
@@ -104,10 +190,11 @@ export default function App() {
       {/* Fixed Sidebar */}
       <Sidebar
         currentPath={currentPath}
-        onNavigate={setCurrentPath}
+        onNavigate={handleNavigate}
         lang={lang}
         isOpenMobile={isMobileSidebarOpen}
         onCloseMobile={() => setIsMobileSidebarOpen(false)}
+        onOpenSecurityHub={() => setIsSecurityHubOpen(true)}
       />
 
       {/* Main App Container */}
@@ -115,11 +202,13 @@ export default function App() {
         {/* Top App Header */}
         <Header
           lang={lang}
+          currentVehicle={currentVehicle}
           onToggleLang={setLang}
           onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
           onOpenMobileSidebar={() => setIsMobileSidebarOpen(true)}
           onSwapVehicle={() => setIsVinScannerOpen(true)}
           onOpenAiAssistant={() => setIsAiModalOpen(true)}
+          onOpenSecurityHub={() => setIsSecurityHubOpen(true)}
         />
 
         {/* Main Content Body */}
@@ -242,6 +331,21 @@ export default function App() {
               </button>
 
               <button
+                onClick={() => setCurrentPath('admin-dashboard')}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-code-sm text-xs transition-all cursor-pointer ${
+                  currentPath === 'admin-dashboard'
+                    ? 'bg-primary text-on-primary font-bold shadow-[0_0_15px_rgba(0,240,255,0.35)]'
+                    : 'bg-surface-container-high text-primary hover:text-on-surface hover:bg-surface-bright border border-primary/30'
+                }`}
+              >
+                <span className="material-symbols-outlined text-base">admin_panel_settings</span>
+                <span>{lang === 'ar' ? 'لوحة المشرف وجودة البيانات' : 'Admin & Data Governance'}</span>
+                <span className="bg-primary/20 text-primary px-1.5 py-0.5 rounded text-[10px] font-bold uppercase">
+                  16 SEC
+                </span>
+              </button>
+
+              <button
                 onClick={() => setCurrentPath('workshop-mode')}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg font-code-sm text-xs transition-all cursor-pointer ${
                   currentPath === 'workshop-mode'
@@ -350,6 +454,39 @@ export default function App() {
                   10 SYS
                 </span>
               </button>
+              <button
+                onClick={() => setIsSecurityHubOpen(true)}
+                className="flex items-center gap-2 px-3.5 py-2 rounded-lg font-code-sm text-xs transition-all cursor-pointer bg-surface-container-high hover:bg-surface-bright text-emerald-300 border border-emerald-500/40 shadow-sm"
+                type="button"
+                title="Open Production Security, RBAC & Audit Trail Center"
+              >
+                <span className="material-symbols-outlined text-base text-emerald-400">shield</span>
+                <span className="font-bold">{lang === 'ar' ? 'مركز الأمان والصلاحيات' : 'Security & RBAC'}</span>
+                <span className="bg-emerald-500/20 text-emerald-300 px-1.5 py-0.5 rounded text-[10px] font-bold uppercase border border-emerald-500/30">
+                  DEFENSES
+                </span>
+              </button>
+
+              {/* State Simulators Quick Dropdown / Buttons for QA */}
+              <button
+                onClick={() => setCurrentPath('404')}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg font-code-sm text-[11px] text-outline hover:text-on-surface hover:bg-surface-container transition-colors cursor-pointer border border-white/5"
+                type="button"
+                title="Test 404 Not Found Page"
+              >
+                <span className="material-symbols-outlined text-xs">find_in_page</span>
+                <span>404 View</span>
+              </button>
+
+              <button
+                onClick={() => setCurrentPath('500')}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg font-code-sm text-[11px] text-outline hover:text-rose-400 hover:bg-surface-container transition-colors cursor-pointer border border-white/5"
+                type="button"
+                title="Test 500 Server Error Page (Masked Stack Trace)"
+              >
+                <span className="material-symbols-outlined text-xs">gpp_maybe</span>
+                <span>500 View</span>
+              </button>
             </div>
 
             <div className="hidden sm:flex items-center gap-2 text-xs font-code-sm text-outline pe-2">
@@ -358,8 +495,34 @@ export default function App() {
             </div>
           </section>
 
+          {/* Offline Banner if disconnected */}
+          {!isOnline && (
+            <div className="mb-6">
+              <OfflineState
+                cachedVehiclesCount={VEHICLE_PROFILES.length}
+                onRetryConnection={() => setIsOnline(navigator.onLine)}
+              />
+            </div>
+          )}
+
           {/* VIEW ROUTING */}
-          {currentPath === 'electrical-wiring' ? (
+          {currentPath === 'admin-dashboard' ? (
+            <AdminDashboard
+              lang={lang}
+              onNavigateHome={() => setCurrentPath('dashboard')}
+            />
+          ) : currentPath === '404' ? (
+            <NotFoundView
+              missingPath="/ecu/powertrain/gateway/unmapped-subsystem"
+              onReturnHome={() => setCurrentPath('dashboard')}
+            />
+          ) : currentPath === '500' ? (
+            <InternalServerErrorView
+              errorCode="POWERTRAIN_CAN_BUS_TIMEOUT_500"
+              onRetry={() => setCurrentPath('dashboard')}
+              onReturnDashboard={() => setCurrentPath('dashboard')}
+            />
+          ) : currentPath === 'electrical-wiring' ? (
             <ElectricalExplorerPage
               currentVehicle={activeVehicleProfile}
               onSelectVehicle={(prof) => handleLoadProfileToWorkshop(prof)}
@@ -535,7 +698,13 @@ export default function App() {
                         ? 'porsche992'
                         : currentVehicle.make.includes('BMW')
                         ? 'bmwM3'
-                        : 'audiRs'
+                        : currentVehicle.make.includes('Audi')
+                        ? 'audiRs'
+                        : currentVehicle.make.includes('Toyota')
+                        ? 'toyotaCamry'
+                        : currentVehicle.make.includes('Ford')
+                        ? 'fordF150'
+                        : 'porsche992'
                     }
                     onChange={(e) => handleVehicleChange(e.target.value)}
                     className="w-full bg-surface-container-low text-primary-container font-code-sm text-xs rounded-lg px-3 py-2.5 appearance-none focus:outline-none focus:bg-surface-container-high cursor-pointer font-semibold border border-white/5"
@@ -543,6 +712,8 @@ export default function App() {
                     <option value="porsche992">Porsche (992)</option>
                     <option value="bmwM3">BMW (G80/G82)</option>
                     <option value="audiRs">Audi (B9 RS)</option>
+                    <option value="toyotaCamry">Toyota (XV70)</option>
+                    <option value="fordF150">Ford (13th Gen)</option>
                   </select>
                   <span className="material-symbols-outlined absolute end-2.5 top-2.5 text-primary-container pointer-events-none text-sm">
                     expand_more
@@ -777,7 +948,7 @@ export default function App() {
         isOpen={isCommandPaletteOpen}
         onClose={() => setIsCommandPaletteOpen(false)}
         lang={lang}
-        onNavigate={setCurrentPath}
+        onNavigate={handleNavigate}
         onOpenDiagnosticTree={() => {
           setDiagnosticInitialSymptom("Engine cranks but doesn't start");
           setIsDiagnosticEngineOpen(true);
@@ -816,6 +987,13 @@ export default function App() {
         activeVehicle={activeVehicleProfile}
         onSelectVehicleProfile={(profile) => handleLoadProfileToWorkshop(profile)}
         onNavigateToProcedure={() => setCurrentPath('repair-guides')}
+      />
+
+      {/* Production Security, RBAC & Audit Hub Modal */}
+      <SecurityHubModal
+        isOpen={isSecurityHubOpen}
+        onClose={() => setIsSecurityHubOpen(false)}
+        lang={lang}
       />
     </div>
   );

@@ -2,6 +2,7 @@ export type Language = 'en' | 'ar';
 
 export type NavPath =
   | 'dashboard'
+  | 'admin-dashboard'
   | 'workshop-mode'
   | 'vehicle-explorer'
   | 'autofix-ai'
@@ -20,7 +21,10 @@ export type NavPath =
   | 'tools-torque'
   | 'parts-catalog'
   | 'system-settings'
-  | 'data-import';
+  | 'data-import'
+  | 'security-hub'
+  | '404'
+  | '500';
 
 export interface VehicleSpec {
   make: string;

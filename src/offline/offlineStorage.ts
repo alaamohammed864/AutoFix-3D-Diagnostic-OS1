@@ -3,6 +3,7 @@
 
 import { VehicleProfile } from '../db/vehicleTypes';
 import { MaintenanceTask } from '../db/maintenanceTypes';
+import { VEHICLE_PROFILES } from '../db/vehicleDatabase';
 
 export type NetworkSyncState = 'ONLINE' | 'OFFLINE' | 'SYNCING';
 
@@ -87,57 +88,7 @@ export function isDeviceOnline(): boolean {
 }
 
 // Initial seed data so users immediately see verified offline data working
-const DEFAULT_SAVED_VEHICLES: VehicleProfile[] = [
-  {
-    id: 'toyota-camry-2018-xv70-2.5l-se-auto',
-    vin: '4T1B11HK5JU123456',
-    year: 2018,
-    make: 'Toyota',
-    model: 'Camry',
-    generation: 'XV70 (8th Gen)',
-    trim: 'SE Sport',
-    bodyStyle: 'Sedan 4-Door',
-    drivetrain: 'FWD',
-    transmission: 'Direct-Shift 8-Speed Automatic (UB80E)',
-    engine: {
-      displacementLiters: 2.5,
-      configuration: 'Inline-4',
-      code: 'A25A-FKS Dynamic Force',
-      aspiration: 'Naturally Aspirated',
-      horsepower: 203,
-      torqueLbFt: 184,
-      valvetrain: 'DOHC 16-Valve D-4S (Direct & Port Dual Injection), VVT-iE / VVT-i',
-      compressionRatio: '13.0:1',
-      redlineRpm: 6800,
-      oilCapacityQuartsWithFilter: 4.8,
-      recommendedOilViscosity: '0W-16 Synthetic (API SN PLUS / SP, ILSAC GF-6B)',
-      coolantCapacityQuarts: 7.3,
-      fuelType: 'Regular Unleaded (87 AKI min)',
-    },
-    electrical: {
-      batteryGroupSize: 'Group 35 (BCI Size 35)',
-      batteryColdCrankingAmps: 640,
-      batteryVoltage: 12,
-      alternatorAmperage: 150,
-      starterKw: 1.4,
-      firingOrder: '1-3-4-2',
-      sparkPlugType: 'Denso FC16HR-Q8 Iridium Long Life (OEM)',
-      sparkPlugGapInches: 0.031,
-    },
-    chassis: {
-      frontSuspension: 'Independent MacPherson Strut with Sport-Tuned Coil Springs & 24mm Stabilizer Bar',
-      rearSuspension: 'Multi-Link Independent Suspension with Lateral Trailing Arms & Stabilizer Bar',
-      frontBrakeType: '11.1-inch Ventilated Discs with Single-Piston Floating Calipers',
-      rearBrakeType: '11.1-inch Solid Discs with Integrated Electronic Parking Brake (EPB) Motor',
-      steeringType: 'Rack-Assist Electric Power Steering (EPS)',
-      wheelLugNutTorqueFtLbs: 76,
-      curbWeightLbs: 3340,
-    },
-    activeDtcCodes: ['P0171', 'C1201'],
-    totalDiagnosticLogs: 3,
-    fuelCapacityGallons: 16.0,
-  }
-];
+const DEFAULT_SAVED_VEHICLES: VehicleProfile[] = VEHICLE_PROFILES;
 
 const DEFAULT_MAINTENANCE_LOGS: OfflineMaintenanceRecord[] = [
   {

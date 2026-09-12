@@ -1,6 +1,6 @@
 import { VehicleSpec, MaintenanceItem } from '../types';
 
-export const mockVehicles: Record<string, VehicleSpec> = {
+export const factoryVehicles: Record<string, VehicleSpec> = {
   porsche992: {
     make: 'Porsche (992)',
     model: '911 Carrera (992.1)',
@@ -40,7 +40,36 @@ export const mockVehicles: Record<string, VehicleSpec> = {
     wheelBoltTorque: '120 Nm (89 lb-ft)',
     vin: 'WAUZZZF53NA048192',
   },
+  toyotaCamry: {
+    make: 'Toyota (XV70)',
+    model: 'Camry SE Sport',
+    year: '2018 (VIN: 4T1B11HK...)',
+    powertrain: '2.5L I4 Dynamic Force (203hp)',
+    drivetrain: 'Front-Wheel Drive (FWD)',
+    gearbox: '8-Speed Direct Shift Automatic',
+    displacement: '2,487 cc',
+    engineOil: 'Toyota Genuine 0W-16 (4.8 L)',
+    sparkGap: '1.00 mm',
+    wheelBoltTorque: '103 Nm (76 lb-ft)',
+    vin: '4T1B11HK5JU128491',
+  },
+  fordF150: {
+    make: 'Ford (13th Gen)',
+    model: 'F-150 Lariat SuperCrew',
+    year: '2019 (VIN: 1FTFW1E8...)',
+    powertrain: '3.5L EcoBoost Twin-Turbo V6 (375hp)',
+    drivetrain: 'Four-Wheel Drive (4WD)',
+    gearbox: '10-Speed SelectShift Automatic',
+    displacement: '3,496 cc',
+    engineOil: 'Motorcraft 5W-30 Synth Blend (5.7 L)',
+    sparkGap: '0.75 mm',
+    wheelBoltTorque: '204 Nm (150 lb-ft)',
+    vin: '1FTFW1E84KFC49182',
+  },
 };
+
+// [DEVELOPMENT-ONLY ALIAS FOR BACKWARD COMPATIBILITY]
+export const mockVehicles: Record<string, VehicleSpec> = factoryVehicles;
 
 export const maintenanceItems: MaintenanceItem[] = [
   {

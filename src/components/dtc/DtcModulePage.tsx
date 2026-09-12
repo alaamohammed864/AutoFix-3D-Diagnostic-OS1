@@ -9,6 +9,8 @@ import {
 import { Language } from '../../types';
 import { InteractiveEngineVisualizer } from './InteractiveEngineVisualizer';
 import { DtcCorrelationViewer } from './DtcCorrelationViewer';
+import { clearDtcOnServer } from '../../security/apiClient';
+import { useAuth } from '../../security/AuthContext';
 
 interface DtcModulePageProps {
   lang: Language;
@@ -49,6 +51,36 @@ export const DtcModulePage: React.FC<DtcModulePageProps> = ({
   const correlations: DtcCorrelation[] = useMemo(() => {
     return evaluateDtcCorrelations(activeCodes);
   }, [activeCodes]);
+
+  const { role } = useAuth();
+  const [isClearing, setIsClearing] = useState(false);
+  const [apiFeedback, setApiFeedback] = useState<{
+    type: 'success' | 'error';
+    message: string;
+    code?: string;
+  } | null>(null);
+
+  // Clear DTC via server-enforced endpoint
+  const handleClearAllDtc = async () => {
+    setIsClearing(true);
+    setApiFeedback(null);
+    try {
+      const res = await clearDtcOnServer(selectedCode, 'ECM_01', 'DTC Suite Clear Operation');
+      setActiveCodes([]);
+      setApiFeedback({
+        type: 'success',
+        message: `${res.message} (Role: ${role} - Security Audit Trail Updated)`,
+      });
+    } catch (err: any) {
+      setApiFeedback({
+        type: 'error',
+        code: err.code || 'AUTHORIZATION_DENIED',
+        message: err.message || 'Operation denied by server-side security policy.',
+      });
+    } finally {
+      setIsClearing(false);
+    }
+  };
 
   // Add new code from input
   const handleAddCode = (rawCode: string) => {
@@ -214,7 +246,49 @@ export const DtcModulePage: React.FC<DtcModulePageProps> = ({
                 </div>
               );
             })}
+
+            {activeCodes.length > 0 && (
+              <button
+                type="button"
+                onClick={handleClearAllDtc}
+                disabled={isClearing}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-container-high hover:bg-error-container hover:text-on-error-container text-outline font-code-sm text-xs font-semibold border border-white/10 transition-all cursor-pointer disabled:opacity-50"
+                title="Clears fault codes on server (Requires Mechanic role or higher)"
+              >
+                <span className="material-symbols-outlined text-sm">
+                  {isClearing ? 'sync' : 'delete_sweep'}
+                </span>
+                <span>{isClearing ? 'Clearing via ECU...' : 'Clear DTCs (Server-RBAC)'}</span>
+              </button>
+            )}
           </div>
+
+          {/* Secure API Error & Success Feedback Banner */}
+          {apiFeedback && (
+            <div
+              className={`p-3 rounded-xl border flex items-center justify-between gap-3 text-xs font-code-sm animate-fade-in ${
+                apiFeedback.type === 'success'
+                  ? 'bg-emerald-950/40 border-emerald-500/40 text-emerald-300'
+                  : 'bg-rose-950/40 border-rose-500/40 text-rose-300'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-base">
+                  {apiFeedback.type === 'success' ? 'check_circle' : 'gpp_bad'}
+                </span>
+                <span>
+                  {apiFeedback.code && <strong>[{apiFeedback.code}] </strong>}
+                  {apiFeedback.message}
+                </span>
+              </div>
+              <button
+                onClick={() => setApiFeedback(null)}
+                className="hover:opacity-100 opacity-60 text-xs p-1"
+              >
+                ✕
+              </button>
+            </div>
+          )}
         </div>
       </section>
 

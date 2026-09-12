@@ -1060,3 +1060,6 @@ export function evaluateDtcCorrelations(activeCodes: string[]): DtcCorrelation[]
 
   return foundCorrelations;
 }
+
+export type DtcRecord = DtcDetail;
+export const DTC_DATABASE = CANONICAL_DTC_DATABASE;

@@ -1,6 +1,6 @@
 {
   "name": "AutoFix 3D Diagnostic OS",
-  "description": "Next-generation interactive 3D automotive telemetry, guided diagnostic trees, and precision workshop intelligence engineered for modern powertrain calibration with bilingual Arabic and English support.",
+  "description": "Next-generation interactive 3D automotive telemetry, guided diagnostic trees, and precision workshop intelligence engineered for modern powertrain calibration with bilingual Arabic and English support. Developed by Eng. Aala Mohammed.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

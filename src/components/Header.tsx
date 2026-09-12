@@ -1,26 +1,34 @@
 import React from 'react';
-import { Language } from '../types';
+import { Language, VehicleSpec } from '../types';
 import { translations } from '../data/translations';
+import { useAuth } from '../security/AuthContext';
+import { ROLE_BADGE_STYLES } from '../security/authTypes';
 
 interface HeaderProps {
   lang: Language;
+  currentVehicle?: VehicleSpec;
   onToggleLang: (lang: Language) => void;
   onOpenCommandPalette: () => void;
   onOpenMobileSidebar: () => void;
   onSwapVehicle: () => void;
   onOpenAiAssistant?: () => void;
+  onOpenSecurityHub?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   lang,
+  currentVehicle,
   onToggleLang,
   onOpenCommandPalette,
   onOpenMobileSidebar,
   onSwapVehicle,
   onOpenAiAssistant,
+  onOpenSecurityHub,
 }) => {
+  const { user, role } = useAuth();
   const t = translations[lang];
   const isAr = lang === 'ar';
+  const roleStyle = ROLE_BADGE_STYLES[role];
 
   return (
     <header className="fixed top-0 start-0 lg:start-72 end-0 h-16 bg-surface/85 backdrop-blur-xl z-30 flex items-center justify-between px-4 lg:px-6 shadow-[0_1px_8px_rgba(0,0,0,0.4)] border-b border-white/5">
@@ -42,20 +50,26 @@ export const Header: React.FC<HeaderProps> = ({
           </span>
         </div>
 
-        {/* Current Vehicle Badge */}
+        {/* Current Vehicle Badge (Fully Dynamic) */}
         <div className="hidden xl:flex items-center gap-2 bg-surface-container-low px-3 py-1.5 rounded-lg text-on-surface border border-white/5">
           <span className="material-symbols-outlined text-secondary text-[16px]">commute</span>
           <div className="flex items-center gap-2 text-xs">
-            <span className="font-headline-md font-medium">2022 Porsche 911 Carrera (992)</span>
+            <span className="font-headline-md font-medium text-on-surface">
+              {currentVehicle ? `${currentVehicle.make} - ${currentVehicle.model}` : 'Active Calibration Rig'}
+            </span>
             <span className="text-outline">•</span>
-            <span className="font-code-sm text-on-surface-variant">3.0L Boxer 6 Twin-Turbo</span>
+            <span className="font-code-sm text-on-surface-variant">
+              {currentVehicle?.powertrain || 'DOHC Multivalve'}
+            </span>
             <span className="text-outline">•</span>
-            <span className="font-code-sm text-secondary">PDK</span>
+            <span className="font-code-sm text-secondary">
+              {currentVehicle?.gearbox || 'Direct Drive'}
+            </span>
           </div>
           <button
             onClick={onSwapVehicle}
             className="ms-2 text-outline hover:text-primary transition-colors flex items-center cursor-pointer"
-            title="Swap Vehicle Rig"
+            title={isAr ? 'تبديل مركبة الورشة' : 'Swap Vehicle Rig'}
             type="button"
           >
             <span className="material-symbols-outlined text-[16px]">swap_horiz</span>
@@ -156,20 +170,52 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         </div>
 
-        {/* Developer / Technician profile */}
-        <div className="flex items-center gap-2 ps-1">
-          <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center shadow-[0_0_8px_rgba(0,240,255,0.3)]">
-            <span className="material-symbols-outlined text-on-primary text-[18px]">person</span>
+        {/* Production Security & RBAC Quick Trigger */}
+        {onOpenSecurityHub && (
+          <button
+            onClick={onOpenSecurityHub}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-surface-container-low hover:bg-surface-container-high border border-white/10 hover:border-primary-container/40 font-code-sm text-xs transition-all cursor-pointer group"
+            type="button"
+            title={isAr ? 'مركز الأمان وإدارة الصلاحيات (RBAC)' : 'Security & RBAC Management Hub'}
+          >
+            <span className="material-symbols-outlined text-[16px] text-emerald-400 group-hover:scale-110 transition-transform">
+              security
+            </span>
+            <span className="hidden sm:inline font-semibold text-on-surface text-[11px]">
+              {isAr ? 'الأمان' : 'Security'}
+            </span>
+            <span
+              className={`px-1.5 py-0.2 rounded text-[10px] font-bold uppercase border ${roleStyle.bg} ${roleStyle.text} ${roleStyle.border}`}
+            >
+              {role}
+            </span>
+          </button>
+        )}
+
+        {/* Developer / Technician profile with interactive role switch */}
+        <button
+          onClick={onOpenSecurityHub}
+          className="flex items-center gap-2 ps-1 rounded-xl p-1 hover:bg-surface-container transition-colors cursor-pointer text-start"
+          type="button"
+          title={isAr ? 'المطور ومسؤول النظام: المهندس علاء محمد (تبديل الصلاحيات وسجل التدقيق)' : 'Lead Developer: Eng. Aala Mohammed (Role Switch & Security Hub)'}
+        >
+          <div
+            className={`w-8 h-8 rounded-full flex items-center justify-center border shadow-sm ${roleStyle.bg} ${roleStyle.text} ${roleStyle.border}`}
+          >
+            <span className="material-symbols-outlined text-[18px]">
+              {roleStyle.icon}
+            </span>
           </div>
           <div className="hidden md:flex flex-col text-start">
             <span className="font-body-sm font-semibold text-on-surface leading-none text-xs">
-              alaa Mohammed
+              {user.name}
             </span>
-            <span className="font-telemetry-label text-secondary leading-tight text-[10px]">
-              {t.masterTech}
+            <span className="font-telemetry-label text-secondary leading-tight text-[10px] flex items-center gap-1">
+              <span>{role}</span>
+              <span className="material-symbols-outlined text-[10px]">expand_more</span>
             </span>
           </div>
-        </div>
+        </button>
       </div>
     </header>
   );

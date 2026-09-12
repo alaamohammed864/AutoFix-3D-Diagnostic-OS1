@@ -1,13 +1,16 @@
 // AutoFix 3D - High-Performance Database Indexing & Query Cache Engine
 // Multi-key inverted indices, LRU in-memory cache, and verified offline data manager
 
-import { VehicleProfile } from './vehicleTypes';
+import { VehicleProfileData, VehicleProfile } from './vehicleTypes';
 import { VEHICLE_PROFILES } from './vehicleDatabase';
 import { COMPONENT_DATABASE, VehicleComponent } from './componentDatabase';
 import { DTC_DATABASE, DtcRecord } from './dtcDatabase';
-import { REPAIR_PROCEDURES, RepairProcedure } from './repairDatabase';
-import { MAINTENANCE_SCHEDULES, MaintenanceSchedule } from './maintenanceDatabase';
+import { REPAIR_PROCEDURES } from './repairDatabase';
+import { RepairProcedure } from './repairTypes';
+import { MaintenanceSchedule } from './maintenanceTypes';
 import { isDeviceOnline } from '../offline/offlineStorage';
+
+const MAINTENANCE_SCHEDULES: MaintenanceSchedule[] = [];
 
 export interface IndexedVehicleDatabase {
   byVin: Map<string, VehicleProfile>;
@@ -138,8 +141,9 @@ class AutoFixDataEngine {
 
     for (const v of VEHICLE_PROFILES) {
       // VIN index (normalized uppercase)
-      if (v.vin) {
-        byVin.set(v.vin.toUpperCase(), v);
+      const vinCode = v.vin || v.vinExample;
+      if (vinCode) {
+        byVin.set(vinCode.toUpperCase(), v);
       }
       // MakeModelYear composite key: e.g. "toyota:camry:2018"
       const mmyKey = `${v.make.toLowerCase()}:${v.model.toLowerCase()}:${v.year}`;
@@ -170,20 +174,23 @@ class AutoFixDataEngine {
     const bySystemId = new Map<string, VehicleComponent[]>();
     const byPartNumber = new Map<string, VehicleComponent>();
 
-    for (const c of COMPONENT_DATABASE) {
+    const components = Object.values(COMPONENT_DATABASE);
+    for (const c of components) {
       byId.set(c.id, c);
 
-      // Category index
-      if (!byCategory.has(c.category)) byCategory.set(c.category, []);
-      byCategory.get(c.category)!.push(c);
+      // System index
+      const sys = c.system || 'General';
+      if (!byCategory.has(sys)) byCategory.set(sys, []);
+      byCategory.get(sys)!.push(c);
 
-      // System ID index
-      if (!bySystemId.has(c.systemId)) bySystemId.set(c.systemId, []);
-      bySystemId.get(c.systemId)!.push(c);
+      const sub = c.subsystem || 'Main';
+      if (!bySystemId.has(sub)) bySystemId.set(sub, []);
+      bySystemId.get(sub)!.push(c);
 
-      // Part number index
-      if (c.oemPartNumber) {
-        byPartNumber.set(c.oemPartNumber.toUpperCase().replace(/[^A-Z0-9]/g, ''), c);
+      for (const p of c.relatedParts || []) {
+        if (p.oemNumber) {
+          byPartNumber.set(p.oemNumber.toUpperCase().replace(/[^A-Z0-9]/g, ''), c);
+        }
       }
     }
 
@@ -192,7 +199,7 @@ class AutoFixDataEngine {
       byCategory,
       bySystemId,
       byPartNumber,
-      allComponents: COMPONENT_DATABASE,
+      allComponents: components,
     };
   }
 
@@ -201,7 +208,8 @@ class AutoFixDataEngine {
     const bySystem = new Map<string, DtcRecord[]>();
     const bySeverity = new Map<string, DtcRecord[]>();
 
-    for (const d of DTC_DATABASE) {
+    const dtcs = Object.values(DTC_DATABASE);
+    for (const d of dtcs) {
       byCode.set(d.code.toUpperCase(), d);
 
       if (!bySystem.has(d.system)) bySystem.set(d.system, []);
@@ -215,7 +223,7 @@ class AutoFixDataEngine {
       byCode,
       bySystem,
       bySeverity,
-      allDtcs: DTC_DATABASE,
+      allDtcs: dtcs,
     };
   }
 
@@ -228,13 +236,15 @@ class AutoFixDataEngine {
       byId.set(r.id, r);
 
       // Vehicle associations
-      for (const vId of r.applicableVehicleIds) {
+      const vehicleIds = r.applicableVehicleIds || (r.vehicleId ? [r.vehicleId] : []);
+      for (const vId of vehicleIds) {
         if (!byVehicleId.has(vId)) byVehicleId.set(vId, []);
         byVehicleId.get(vId)!.push(r);
       }
 
-      if (!byCategory.has(r.category)) byCategory.set(r.category, []);
-      byCategory.get(r.category)!.push(r);
+      const cat = r.category || r.system || 'General';
+      if (!byCategory.has(cat)) byCategory.set(cat, []);
+      byCategory.get(cat)!.push(r);
     }
 
     return {

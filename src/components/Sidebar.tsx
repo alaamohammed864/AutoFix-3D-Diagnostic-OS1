@@ -8,6 +8,7 @@ interface SidebarProps {
   lang: Language;
   isOpenMobile: boolean;
   onCloseMobile: () => void;
+  onOpenSecurityHub?: () => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -16,6 +17,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   lang,
   isOpenMobile,
   onCloseMobile,
+  onOpenSecurityHub,
 }) => {
   const t = translations[lang];
 
@@ -362,6 +364,26 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
         <a
           onClick={() => {
+            onNavigate('admin-dashboard');
+            onCloseMobile();
+          }}
+          className={`flex items-center justify-between px-3 py-2 rounded-lg transition-colors cursor-pointer text-xs ${
+            currentPath === 'admin-dashboard'
+              ? 'bg-primary-container text-on-primary-container font-semibold shadow-[0_0_12px_rgba(0,240,255,0.25)]'
+              : 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'
+          }`}
+        >
+          <div className="flex items-center gap-2.5">
+            <span className="material-symbols-outlined text-[18px] text-primary">admin_panel_settings</span>
+            <span className="font-body-md font-bold text-on-surface">{t.adminDashboard}</span>
+          </div>
+          <span className="px-1.5 py-0.2 rounded bg-primary/20 text-primary text-[9px] font-code-sm font-bold border border-primary/30">
+            16 SEC
+          </span>
+        </a>
+
+        <a
+          onClick={() => {
             onNavigate('data-import');
             onCloseMobile();
           }}
@@ -382,6 +404,30 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
         <a
           onClick={() => {
+            if (onOpenSecurityHub) {
+              onOpenSecurityHub();
+            } else {
+              onNavigate('system-settings');
+            }
+            onCloseMobile();
+          }}
+          className="flex items-center justify-between px-3 py-2 rounded-lg transition-colors cursor-pointer text-xs text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface group"
+        >
+          <div className="flex items-center gap-2.5">
+            <span className="material-symbols-outlined text-[18px] text-emerald-400 group-hover:scale-110 transition-transform">
+              security
+            </span>
+            <span className="font-body-md font-medium text-on-surface">
+              {lang === 'ar' ? 'الأمان وتحديد الصلاحيات' : 'Security & RBAC'}
+            </span>
+          </div>
+          <span className="px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 text-[9px] font-code-sm font-bold border border-emerald-500/30">
+            PROD
+          </span>
+        </a>
+
+        <a
+          onClick={() => {
             onNavigate('system-settings');
             onCloseMobile();
           }}
@@ -394,6 +440,26 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <span className="material-symbols-outlined text-[18px]">tune</span>
           <span className="font-body-md">{t.systemSettings}</span>
         </a>
+
+        {/* Lead Developer Attribution */}
+        <div className="mt-3 pt-3 border-t border-white/5 px-1 pb-1">
+          <div className="bg-surface-container-low/70 border border-primary-container/20 rounded-xl p-2.5 flex items-center gap-2.5 shadow-sm">
+            <div className="w-8 h-8 rounded-lg bg-primary-container/15 text-primary-container flex items-center justify-center shrink-0 border border-primary-container/30">
+              <span className="material-symbols-outlined text-[18px]">code</span>
+            </div>
+            <div className="flex flex-col min-w-0">
+              <span className="text-[10px] font-telemetry-label text-outline uppercase tracking-wider leading-none">
+                {lang === 'ar' ? 'مطور النظام' : 'Lead Developer'}
+              </span>
+              <span className="text-xs font-headline-md font-bold text-on-surface truncate mt-1">
+                {lang === 'ar' ? 'المهندس علاء محمد' : 'Eng. Aala Mohammed'}
+              </span>
+              <span className="text-[9px] font-code-sm text-secondary truncate">
+                eng aala mohammed
+              </span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

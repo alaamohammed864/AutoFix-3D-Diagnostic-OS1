@@ -1,6 +1,23 @@
 import React, { useState } from 'react';
 import { ComponentDetail, AUTOMOTIVE_COMPONENTS } from '../../db/componentDatabase';
 import { Language } from '../../types';
+import { useSimulation } from '../../simulation/SimulationContext';
+import { SensorId, ActuatorId, SensorFaultState } from '../../simulation/types';
+
+const COMPONENT_SIMULATION_MAP: Record<string, { sensorId?: SensorId; actuatorId?: ActuatorId }> = {
+  'throttle-body': { sensorId: 'tps', actuatorId: 'throttle_sweep' },
+  'radiator': { sensorId: 'ect', actuatorId: 'cooling_fan_high' },
+  'cooling-system': { sensorId: 'ect', actuatorId: 'cooling_fan_high' },
+  'fuel-tank': { sensorId: 'frp', actuatorId: 'fuel_pump_relay' },
+  'turbocharger': { sensorId: 'map' },
+  'abs-pump': { sensorId: 'wss_fl', actuatorId: 'abs_pump_motor' },
+  'brake-caliper': { sensorId: 'wss_fl', actuatorId: 'abs_pump_motor' },
+  'exhaust-system': { sensorId: 'o2_b1s1' },
+  'catalytic-converter': { sensorId: 'o2_b1s2' },
+  'engine-block': { sensorId: 'ckp', actuatorId: 'injector_1' },
+  'battery': { sensorId: 'bap' },
+  'intercooler': { sensorId: 'iat' },
+};
 
 interface ComponentInspectionDrawerProps {
   component: ComponentDetail | null;
@@ -15,11 +32,23 @@ export const ComponentInspectionDrawer: React.FC<ComponentInspectionDrawerProps>
   onSelectRelated,
   lang,
 }) => {
+  const {
+    sensors,
+    actuatorTests,
+    injectSensorFault,
+    runActuatorTest,
+    activeDtcs,
+  } = useSimulation();
+
   const [activeTab, setActiveTab] = useState<'overview' | 'diagnostics' | 'repair' | 'tools'>(
     'overview'
   );
 
   if (!component) return null;
+
+  const simMapping = COMPONENT_SIMULATION_MAP[component.id];
+  const linkedSensor = simMapping?.sensorId ? sensors[simMapping.sensorId] : null;
+  const linkedActuator = simMapping?.actuatorId ? actuatorTests[simMapping.actuatorId] : null;
 
   const relatedComponents = component.relatedComponentIds
     .map((id) => AUTOMOTIVE_COMPONENTS[id])
@@ -181,6 +210,124 @@ export const ComponentInspectionDrawer: React.FC<ComponentInspectionDrawerProps>
 
         {activeTab === 'diagnostics' && (
           <div className="space-y-4">
+            {/* Live Interactive Diagnostic Controls */}
+            {(linkedSensor || linkedActuator) && (
+              <div className="p-3.5 rounded-xl bg-surface-container-high/80 border border-primary-container/30 space-y-3 shadow-lg">
+                <div className="flex items-center justify-between border-b border-white/10 pb-2">
+                  <div className="flex items-center gap-2">
+                    <span className="h-2 w-2 rounded-full bg-primary-container animate-ping"></span>
+                    <span className="font-code-sm text-xs font-bold text-primary-container uppercase tracking-wider">
+                      {lang === 'ar' ? 'فحص ومحاكاة المكون الحية' : 'Live Component Diagnostic Lab'}
+                    </span>
+                  </div>
+                  <span className="px-1.5 py-0.5 rounded text-[10px] font-code-sm bg-primary-container/20 text-primary-container border border-primary-container/30">
+                    Real-time Rig
+                  </span>
+                </div>
+
+                {/* Sensor Circuit Telemetry & Fault Injection */}
+                {linkedSensor && (
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-xs font-code-sm">
+                      <span className="text-outline">
+                        {lang === 'ar' ? 'إشارة الحساس الحالية:' : 'Live Sensor Signal:'}
+                      </span>
+                      <span className="font-bold text-on-surface">
+                        {linkedSensor.currentValue} {linkedSensor.unit} ({linkedSensor.voltage.toFixed(2)} V)
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between text-xs font-code-sm">
+                      <span className="text-outline">{lang === 'ar' ? 'حالة الدائرة:' : 'Circuit Status:'}</span>
+                      <span
+                        className={`px-2 py-0.5 rounded font-bold ${
+                          linkedSensor.state === 'NORMAL'
+                            ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                            : 'bg-rose-500/20 text-rose-300 border border-rose-500/30 animate-pulse'
+                        }`}
+                      >
+                        {linkedSensor.state}
+                      </span>
+                    </div>
+
+                    {/* Sensor Fault Buttons */}
+                    <div className="pt-1.5 flex flex-wrap gap-1.5">
+                      <button
+                        onClick={() => injectSensorFault(linkedSensor.id, 'OPEN_CIRCUIT')}
+                        className="px-2 py-1 rounded bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 text-[10px] font-code-sm font-bold transition-colors cursor-pointer"
+                      >
+                        ⚡ {lang === 'ar' ? 'حقن دائرة مفتوحة' : 'Open Circuit'}
+                      </button>
+                      <button
+                        onClick={() => injectSensorFault(linkedSensor.id, 'SHORT_TO_GROUND')}
+                        className="px-2 py-1 rounded bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 text-[10px] font-code-sm font-bold transition-colors cursor-pointer"
+                      >
+                        ⚡ {lang === 'ar' ? 'قصر للأرضي' : 'Short to GND'}
+                      </button>
+                      <button
+                        onClick={() => injectSensorFault(linkedSensor.id, 'HIGH_SIGNAL')}
+                        className="px-2 py-1 rounded bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/30 text-[10px] font-code-sm font-bold transition-colors cursor-pointer"
+                      >
+                        ⚡ {lang === 'ar' ? 'إشارة مرتفعة' : 'High Signal'}
+                      </button>
+                      {linkedSensor.state !== 'NORMAL' && (
+                        <button
+                          onClick={() => injectSensorFault(linkedSensor.id, 'NORMAL')}
+                          className="px-2 py-1 rounded bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 text-[10px] font-code-sm font-bold transition-colors cursor-pointer"
+                        >
+                          ✓ {lang === 'ar' ? 'إعادة ضبط' : 'Reset Sensor'}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Actuator Bi-directional Test Control */}
+                {linkedActuator && (
+                  <div className="pt-2 border-t border-white/10 space-y-2">
+                    <div className="flex items-center justify-between text-xs font-code-sm">
+                      <span className="text-outline">
+                        {lang === 'ar' ? 'فحص المشغل النشط:' : 'Bi-directional Actuator:'}
+                      </span>
+                      <span className="font-bold capitalize text-primary-container">
+                        {linkedActuator.status}
+                      </span>
+                    </div>
+
+                    {linkedActuator.status === 'running' && (
+                      <div className="space-y-1">
+                        <div className="w-full bg-surface-container rounded-full h-1.5 overflow-hidden">
+                          <div
+                            className="bg-primary-container h-full transition-all duration-300"
+                            style={{ width: `${linkedActuator.progressPct}%` }}
+                          ></div>
+                        </div>
+                        <span className="text-[10px] font-code-sm text-outline block text-right">
+                          {linkedActuator.progressPct}%
+                        </span>
+                      </div>
+                    )}
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => runActuatorTest(linkedActuator.id)}
+                        disabled={linkedActuator.status === 'running'}
+                        className="px-3 py-1.5 rounded-lg bg-primary-container hover:bg-primary-container/80 text-on-primary-container text-xs font-code-sm font-bold transition-all disabled:opacity-50 cursor-pointer flex items-center gap-1.5"
+                      >
+                        <span className="material-symbols-outlined text-sm">play_arrow</span>
+                        <span>{lang === 'ar' ? 'تشغيل فحص الأداء' : 'Run Actuator Test'}</span>
+                      </button>
+                      {linkedActuator.lastTestedAt && (
+                        <span className="text-[10px] font-code-sm text-outline">
+                          {linkedActuator.measuredCurrentA} A ({linkedActuator.status.toUpperCase()})
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Symptoms */}
             <div className="space-y-2">
               <h4 className="font-code-sm text-[11px] font-bold text-error uppercase tracking-wider flex items-center gap-1.5">

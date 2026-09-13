@@ -171,6 +171,172 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </span>
           </a>
 
+          {/* Section: Diagnostic Lab & Live Controls */}
+          <div className="px-2 pt-3 pb-1">
+            <span className="font-telemetry-label text-[10px] text-outline uppercase tracking-wider">
+              {lang === 'ar' ? 'مختبر التشخيص المباشر' : 'Diagnostic Lab & Testing'}
+            </span>
+          </div>
+
+          <a
+            className={navItemClass('live-telemetry')}
+            onClick={() => {
+              onNavigate('live-telemetry');
+              onCloseMobile();
+            }}
+          >
+            <div className="flex items-center gap-2.5">
+              <span className="material-symbols-outlined text-[18px] text-cyan-400">monitoring</span>
+              <span className="font-body-md font-semibold text-cyan-400">
+                {lang === 'ar' ? 'البيانات الحية والعدادات' : 'Live Telemetry Gauges'}
+              </span>
+            </div>
+            <span className="bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 px-1.5 py-0.5 rounded text-[9px] font-code-sm font-bold">
+              60ms
+            </span>
+          </a>
+
+          <a
+            className={navItemClass('sensor-faults')}
+            onClick={() => {
+              onNavigate('sensor-faults');
+              onCloseMobile();
+            }}
+          >
+            <div className="flex items-center gap-2.5">
+              <span className="material-symbols-outlined text-[18px] text-rose-400">flash_on</span>
+              <span className="font-body-md font-semibold text-rose-300">
+                {lang === 'ar' ? 'حقن أعطال الحساسات' : 'Sensor Fault Injector'}
+              </span>
+            </div>
+            <span className="bg-rose-500/20 text-rose-300 border border-rose-500/30 px-1.5 py-0.5 rounded text-[9px] font-code-sm font-bold">
+              12 SENS
+            </span>
+          </a>
+
+          <a
+            className={navItemClass('actuator-tests')}
+            onClick={() => {
+              onNavigate('actuator-tests');
+              onCloseMobile();
+            }}
+          >
+            <div className="flex items-center gap-2.5">
+              <span className="material-symbols-outlined text-[18px] text-amber-400">precision_manufacturing</span>
+              <span className="font-body-md font-semibold text-amber-300">
+                {lang === 'ar' ? 'اختبار المشغلات ثنائي الاتجاه' : 'Bi-directional Actuators'}
+              </span>
+            </div>
+            <span className="bg-amber-500/20 text-amber-300 border border-amber-500/30 px-1.5 py-0.5 rounded text-[9px] font-code-sm font-bold">
+              MODE 08
+            </span>
+          </a>
+
+          <a
+            className={navItemClass('can-analyzer')}
+            onClick={() => {
+              onNavigate('can-analyzer');
+              onCloseMobile();
+            }}
+          >
+            <div className="flex items-center gap-2.5">
+              <span className="material-symbols-outlined text-[18px] text-emerald-400">cable</span>
+              <span className="font-body-md text-on-surface">
+                {lang === 'ar' ? 'محلل شبكة CAN Bus' : 'CAN Bus Analyzer'}
+              </span>
+            </div>
+            <span className="bg-emerald-500/20 text-emerald-300 px-1.5 py-0.5 rounded text-[9px] font-code-sm font-bold">
+              500k
+            </span>
+          </a>
+
+          <a
+            className={navItemClass('ecu-topology')}
+            onClick={() => {
+              onNavigate('ecu-topology');
+              onCloseMobile();
+            }}
+          >
+            <div className="flex items-center gap-2.5">
+              <span className="material-symbols-outlined text-[18px] text-primary-container">hub</span>
+              <span className="font-body-md text-on-surface">
+                {lang === 'ar' ? 'طوبولوجيا شبكة الـ ECU' : 'ECU Network Map'}
+              </span>
+            </div>
+            <span className="bg-primary-container/20 text-primary-container px-1.5 py-0.5 rounded text-[9px] font-code-sm font-bold">
+              7 NODES
+            </span>
+          </a>
+
+          <a
+            className={navItemClass('obd-modes')}
+            onClick={() => {
+              onNavigate('obd-modes');
+              onCloseMobile();
+            }}
+          >
+            <div className="flex items-center gap-2.5">
+              <span className="material-symbols-outlined text-[18px] text-purple-400">troubleshoot</span>
+              <span className="font-body-md text-on-surface">
+                {lang === 'ar' ? 'ماسح OBD-II الكامل' : 'Standard OBD-II Scanner'}
+              </span>
+            </div>
+            <span className="bg-purple-500/20 text-purple-300 px-1.5 py-0.5 rounded text-[9px] font-code-sm font-bold">
+              9 MODES
+            </span>
+          </a>
+
+          <a
+            className={navItemClass('service-resets')}
+            onClick={() => {
+              onNavigate('service-resets');
+              onCloseMobile();
+            }}
+          >
+            <div className="flex items-center gap-2.5">
+              <span className="material-symbols-outlined text-[18px] text-blue-400">build_circle</span>
+              <span className="font-body-md text-on-surface">
+                {lang === 'ar' ? 'المعايرات وتصفير الصيانة' : 'Dealer Service Resets'}
+              </span>
+            </div>
+            <span className="bg-blue-500/20 text-blue-300 px-1.5 py-0.5 rounded text-[9px] font-code-sm font-bold">
+              8 RESET
+            </span>
+          </a>
+
+          <a
+            className={navItemClass('health-score')}
+            onClick={() => {
+              onNavigate('health-score');
+              onCloseMobile();
+            }}
+          >
+            <div className="flex items-center gap-2.5">
+              <span className="material-symbols-outlined text-[18px] text-teal-400">health_and_safety</span>
+              <span className="font-body-md text-on-surface">
+                {lang === 'ar' ? 'مؤشر كفاءة المركبة' : 'Vehicle Health Score'}
+              </span>
+            </div>
+            <span className="bg-teal-500/20 text-teal-300 px-1.5 py-0.5 rounded text-[9px] font-code-sm font-bold">
+              SCORE
+            </span>
+          </a>
+
+          <a
+            className={navItemClass('symptom-troubleshoot')}
+            onClick={() => {
+              onNavigate('symptom-troubleshoot');
+              onCloseMobile();
+            }}
+          >
+            <div className="flex items-center gap-2.5">
+              <span className="material-symbols-outlined text-[18px] text-pink-400">psychology</span>
+              <span className="font-body-md text-on-surface">
+                {lang === 'ar' ? 'مساعد تشخيص الأعراض' : 'Symptom Troubleshooter'}
+              </span>
+            </div>
+          </a>
+
           {/* Section 2: Vehicle Subsystems */}
           <div className="px-2 pt-3 pb-1">
             <span className="font-telemetry-label text-[10px] text-outline uppercase tracking-wider">

@@ -33,6 +33,20 @@ import { SecurityHubModal } from './components/security/SecurityHubModal';
 import { NotFoundView } from './components/common/NotFoundView';
 import { InternalServerErrorView } from './components/common/InternalServerErrorView';
 import { OfflineState } from './components/common/OfflineState';
+import { LiveScanModal } from './components/diagnostic/LiveScanModal';
+import { LiveTelemetryDashboard } from './components/diagnostic/LiveTelemetryDashboard';
+import { SensorFaultSimulator } from './components/diagnostic/SensorFaultSimulator';
+import { ActuatorTestingConsole } from './components/diagnostic/ActuatorTestingConsole';
+import { CanBusAnalyzer } from './components/diagnostic/CanBusAnalyzer';
+import { EcuTopologyMap } from './components/diagnostic/EcuTopologyMap';
+import { ObdModesConsole } from './components/diagnostic/ObdModesConsole';
+import { VehicleHealthScoreCard } from './components/diagnostic/VehicleHealthScoreCard';
+import { SymptomTroubleshooter } from './components/diagnostic/SymptomTroubleshooter';
+import { ServiceResetCenter } from './components/diagnostic/ServiceResetCenter';
+import { PrintableDiagnosticReport } from './components/diagnostic/PrintableDiagnosticReport';
+import { SessionHistoryDrawer } from './components/diagnostic/SessionHistoryDrawer';
+import { useSimulation } from './simulation/SimulationContext';
+import { DiagnosticSessionReport } from './simulation/types';
 
 export default function App() {
   const [lang, setLang] = useState<Language>('en');
@@ -54,10 +68,14 @@ export default function App() {
   const [isVideoGuideOpen, setIsVideoGuideOpen] = useState(false);
   const [isVinScannerOpen, setIsVinScannerOpen] = useState(false);
   const [isAiModalOpen, setIsAiModalOpen] = useState(false);
+  const [isLiveScanOpen, setIsLiveScanOpen] = useState(false);
+  const [isSessionHistoryOpen, setIsSessionHistoryOpen] = useState(false);
+  const [activePrintReport, setActivePrintReport] = useState<DiagnosticSessionReport | null>(null);
 
-  // Live telemetry stream rate simulation
+  // Live telemetry stream rate & simulation
   const [streamRate, setStreamRate] = useState(20);
-  const [activeFaultCount, setActiveFaultCount] = useState(1);
+  const { activeDtcs, healthScore, clearAllDtcs } = useSimulation();
+  const activeFaultCount = activeDtcs.length;
   const [activeVehicleProfile, setActiveVehicleProfile] = useState<VehicleProfileData>(VEHICLE_PROFILES[0]);
 
   const t = translations[lang];
@@ -88,7 +106,7 @@ export default function App() {
   };
 
   const handleCodeCleared = () => {
-    setActiveFaultCount(0);
+    clearAllDtcs();
   };
 
   const handleVehicleChange = (key: string) => {
@@ -271,6 +289,24 @@ export default function App() {
             {/* Quick Tool Actions (Zero clutter, clean response) */}
             <div className="flex items-center gap-2.5 self-start xl:self-auto shrink-0 flex-wrap">
               <button
+                onClick={() => setIsLiveScanOpen(true)}
+                className="flex items-center gap-1.5 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 px-3 py-1.5 rounded-lg font-code-sm text-xs transition-all shadow-[0_0_12px_rgba(0,240,255,0.2)] cursor-pointer whitespace-nowrap"
+                type="button"
+              >
+                <span className="material-symbols-outlined text-[16px] animate-pulse">radar</span>
+                <span className="font-bold">{lang === 'ar' ? 'فحص كامل للنظام' : 'Full Vehicle Scan'}</span>
+              </button>
+
+              <button
+                onClick={() => setIsSessionHistoryOpen(true)}
+                className="flex items-center gap-1.5 bg-surface-container-high hover:bg-surface-bright text-on-surface px-3 py-1.5 rounded-lg font-code-sm text-xs transition-colors border border-white/5 cursor-pointer whitespace-nowrap"
+                type="button"
+              >
+                <span className="material-symbols-outlined text-[16px] text-teal-400">history_edu</span>
+                <span>{lang === 'ar' ? 'سجل التقارير' : 'Scan Reports'}</span>
+              </button>
+
+              <button
                 onClick={() => setIsObdLogOpen(true)}
                 className="flex items-center gap-1.5 bg-surface-container hover:bg-surface-container-high text-primary-container px-3 py-1.5 rounded-lg font-code-sm text-xs transition-colors shadow-sm border border-white/5 cursor-pointer whitespace-nowrap"
                 type="button"
@@ -349,7 +385,76 @@ export default function App() {
                 <span className="material-symbols-outlined text-base shrink-0">warning</span>
                 <span>{lang === 'ar' ? 'فاحص الأعطال' : 'OBD-II / DTC'}</span>
                 <span className="bg-error-container/50 text-on-error-container px-1.5 py-0.5 rounded text-[10px] font-bold leading-none shrink-0">
-                  DTC
+                  {activeFaultCount} DTC
+                </span>
+              </button>
+
+              <button
+                onClick={() => setCurrentPath('live-telemetry')}
+                className={`shrink-0 whitespace-nowrap flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg font-code-sm text-xs transition-all cursor-pointer ${
+                  currentPath === 'live-telemetry'
+                    ? 'bg-cyan-500 text-neutral-950 font-bold shadow-[0_0_15px_rgba(0,240,255,0.35)]'
+                    : 'text-cyan-300 hover:text-on-surface hover:bg-surface-container-high border border-cyan-500/30'
+                }`}
+              >
+                <span className="material-symbols-outlined text-base shrink-0">monitoring</span>
+                <span>{lang === 'ar' ? 'البيانات الحية' : 'Live Telemetry'}</span>
+                <span className="bg-cyan-500/20 text-cyan-300 px-1.5 py-0.5 rounded text-[10px] font-bold leading-none shrink-0">
+                  LIVE
+                </span>
+              </button>
+
+              <button
+                onClick={() => setCurrentPath('sensor-faults')}
+                className={`shrink-0 whitespace-nowrap flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg font-code-sm text-xs transition-all cursor-pointer ${
+                  currentPath === 'sensor-faults'
+                    ? 'bg-rose-500 text-white font-bold shadow-[0_0_15px_rgba(244,63,94,0.35)]'
+                    : 'text-rose-400 hover:text-on-surface hover:bg-surface-container-high border border-rose-500/30'
+                }`}
+              >
+                <span className="material-symbols-outlined text-base shrink-0">flash_on</span>
+                <span>{lang === 'ar' ? 'حقن الأعطال' : 'Fault Injector'}</span>
+                <span className="bg-rose-500/20 text-rose-300 px-1.5 py-0.5 rounded text-[10px] font-bold leading-none shrink-0">
+                  SIM
+                </span>
+              </button>
+
+              <button
+                onClick={() => setCurrentPath('actuator-tests')}
+                className={`shrink-0 whitespace-nowrap flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg font-code-sm text-xs transition-all cursor-pointer ${
+                  currentPath === 'actuator-tests'
+                    ? 'bg-amber-500 text-neutral-950 font-bold shadow-[0_0_15px_rgba(245,158,11,0.35)]'
+                    : 'text-amber-300 hover:text-on-surface hover:bg-surface-container-high border border-amber-500/30'
+                }`}
+              >
+                <span className="material-symbols-outlined text-base shrink-0">precision_manufacturing</span>
+                <span>{lang === 'ar' ? 'اختبار المشغلات' : 'Actuator Tests'}</span>
+              </button>
+
+              <button
+                onClick={() => setCurrentPath('ecu-topology')}
+                className={`shrink-0 whitespace-nowrap flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg font-code-sm text-xs transition-all cursor-pointer ${
+                  currentPath === 'ecu-topology'
+                    ? 'bg-primary-container text-on-primary-container font-bold shadow-[0_0_15px_rgba(0,240,255,0.3)]'
+                    : 'text-outline hover:text-on-surface hover:bg-surface-container-high'
+                }`}
+              >
+                <span className="material-symbols-outlined text-base shrink-0">hub</span>
+                <span>{lang === 'ar' ? 'طوبولوجيا ECU' : 'ECU Network'}</span>
+              </button>
+
+              <button
+                onClick={() => setCurrentPath('health-score')}
+                className={`shrink-0 whitespace-nowrap flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg font-code-sm text-xs transition-all cursor-pointer ${
+                  currentPath === 'health-score'
+                    ? 'bg-teal-500 text-neutral-950 font-bold shadow-[0_0_15px_rgba(20,184,166,0.35)]'
+                    : 'text-teal-300 hover:text-on-surface hover:bg-surface-container-high border border-teal-500/30'
+                }`}
+              >
+                <span className="material-symbols-outlined text-base shrink-0">health_and_safety</span>
+                <span>{lang === 'ar' ? 'صحة المركبة' : 'Health Score'}</span>
+                <span className="bg-teal-500/20 text-teal-300 px-1.5 py-0.5 rounded text-[10px] font-bold leading-none shrink-0">
+                  {healthScore.overallScore}%
                 </span>
               </button>
 
@@ -560,6 +665,49 @@ export default function App() {
                 }, 100);
               }}
               onNavigateToRepair={() => setCurrentPath('repair-guides')}
+            />
+          ) : currentPath === 'live-telemetry' ? (
+            <LiveTelemetryDashboard
+              lang={lang}
+              onOpenFullScan={() => setIsLiveScanOpen(true)}
+              onOpenFaultInjector={() => setCurrentPath('sensor-faults')}
+            />
+          ) : currentPath === 'sensor-faults' ? (
+            <SensorFaultSimulator
+              lang={lang}
+              onSelectComponentFor3D={(componentId) => {
+                setTarget3DComponentId(componentId);
+                setCurrentPath('dashboard');
+                setTimeout(() => {
+                  window.scrollTo({ top: 380, behavior: 'smooth' });
+                }, 100);
+              }}
+            />
+          ) : currentPath === 'actuator-tests' ? (
+            <ActuatorTestingConsole lang={lang} />
+          ) : currentPath === 'can-analyzer' ? (
+            <CanBusAnalyzer lang={lang} />
+          ) : currentPath === 'ecu-topology' ? (
+            <EcuTopologyMap lang={lang} />
+          ) : currentPath === 'obd-modes' ? (
+            <ObdModesConsole
+              lang={lang}
+              onNavigateToActuators={() => setCurrentPath('actuator-tests')}
+            />
+          ) : currentPath === 'service-resets' ? (
+            <ServiceResetCenter lang={lang} />
+          ) : currentPath === 'health-score' ? (
+            <VehicleHealthScoreCard lang={lang} />
+          ) : currentPath === 'symptom-troubleshoot' ? (
+            <SymptomTroubleshooter
+              lang={lang}
+              onInspect3dComponent={(componentId) => {
+                setTarget3DComponentId(componentId);
+                setCurrentPath('dashboard');
+                setTimeout(() => {
+                  window.scrollTo({ top: 380, behavior: 'smooth' });
+                }, 100);
+              }}
             />
           ) : currentPath === 'vehicle-explorer' ? (
             <VehicleExplorer
@@ -976,6 +1124,31 @@ export default function App() {
         onClose={() => setIsSecurityHubOpen(false)}
         lang={lang}
       />
+
+      {/* Automotive Diagnostics 9-Stage Live Scan Suite */}
+      <LiveScanModal
+        isOpen={isLiveScanOpen}
+        onClose={() => setIsLiveScanOpen(false)}
+        lang={lang}
+        onViewFullReport={(report) => setActivePrintReport(report)}
+      />
+
+      {/* Diagnostic Session & Scan History Drawer */}
+      <SessionHistoryDrawer
+        isOpen={isSessionHistoryOpen}
+        onClose={() => setIsSessionHistoryOpen(false)}
+        lang={lang}
+        onViewReport={(report) => setActivePrintReport(report)}
+      />
+
+      {/* OEM Compliant Printable Diagnostic Inspection Report */}
+      {activePrintReport && (
+        <PrintableDiagnosticReport
+          report={activePrintReport}
+          onClose={() => setActivePrintReport(null)}
+          lang={lang}
+        />
+      )}
     </div>
   );
 }

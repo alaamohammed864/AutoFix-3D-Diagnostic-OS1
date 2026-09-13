@@ -64,6 +64,7 @@ export interface VehicleProfileData {
   id: string; // e.g. "toyota-camry-2018-xv70-2.5l-se-auto"
   make: string;
   model: string;
+  nameAr?: string;
   year: number;
   generation: string; // e.g. "XV70 (8th Gen)"
   engine: string; // e.g. "2.5L I4 Dynamic Force (A25A-FKS)"

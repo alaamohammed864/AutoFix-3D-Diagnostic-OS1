@@ -155,3 +155,5 @@ export interface ChatMessage {
     videoCount: number;
   };
 }
+
+export type AiMessage = ChatMessage;

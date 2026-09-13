@@ -20,6 +20,10 @@ import {
   RetrievedVehicleContext,
   SourceCitation,
 } from './types';
+import {
+  normalizeArabic,
+  analyzeMultilingualAutomotiveQuery,
+} from '../search/terminologyMap';
 
 // Detect if a query mentions an unverified vehicle make or model
 const KNOWN_MAKES = ['toyota', 'porsche', 'ford', 'honda', 'chevrolet', 'chevy'];
@@ -30,7 +34,10 @@ export function retrieveVerifiedData(
   activeProfile: VehicleProfileData,
   explicitDtc?: string
 ): RetrievedDataContext {
-  const q = query.toLowerCase();
+  const rawQ = query.trim();
+  const q = rawQ.toLowerCase();
+  const normAr = normalizeArabic(rawQ);
+  const queryAnalysis = analyzeMultilingualAutomotiveQuery(rawQ);
   const sources: SourceCitation[] = [];
 
   // 1. Vehicle Context Resolution
@@ -39,11 +46,17 @@ export function retrieveVerifiedData(
 
   // Check if query mentions a specific profile from our database
   for (const prof of VEHICLE_PROFILES) {
-    const makeMatch = q.includes(prof.make.toLowerCase());
-    const modelMatch = q.includes(prof.model.toLowerCase());
+    const makeMatch =
+      q.includes(prof.make.toLowerCase()) ||
+      (queryAnalysis.makeEn && prof.make.toLowerCase() === queryAnalysis.makeEn.toLowerCase()) ||
+      normAr.includes(normalizeArabic(prof.nameAr || ''));
+    const modelMatch =
+      q.includes(prof.model.toLowerCase()) ||
+      (queryAnalysis.modelEn && prof.model.toLowerCase() === queryAnalysis.modelEn.toLowerCase()) ||
+      normAr.includes(normalizeArabic(prof.model));
     const yearMatch = q.includes(prof.year.toString());
 
-    if (makeMatch && modelMatch) {
+    if ((makeMatch && modelMatch) || (queryAnalysis.makeEn && prof.make.toLowerCase() === queryAnalysis.makeEn.toLowerCase())) {
       matchedProfile = prof;
       isExactMatch = yearMatch || true;
       break;
@@ -58,10 +71,10 @@ export function retrieveVerifiedData(
 
   // Check for foreign/unverified vehicle query:
   // If user explicitly asked about a make/model not in our DB
-  const foreignVehicleTokens = ['subaru', 'bmw', 'mercedes', 'nissan', 'hyundai', 'kia', 'audi', 'volvo', 'mazda', 'jeep', 'dodge', 'ram', 'tesla'];
-  const mentionsForeignVehicle = foreignVehicleTokens.some((make) => q.includes(make));
+  const foreignVehicleTokens = ['subaru', 'bmw', 'mercedes', 'nissan', 'hyundai', 'kia', 'audi', 'volvo', 'mazda', 'jeep', 'dodge', 'ram', 'tesla', 'سوبارو', 'بي ام دبليو', 'مرسيدس', 'نيسان', 'هيونداي', 'كيا', 'اودي', 'فولفو', 'مازدا', 'جيب', 'دودج', 'رام', 'تسلا'];
+  const mentionsForeignVehicle = foreignVehicleTokens.some((make) => q.includes(make) || normAr.includes(normalizeArabic(make)));
 
-  if (mentionsForeignVehicle && !q.includes(activeProfile.make.toLowerCase())) {
+  if (mentionsForeignVehicle && !q.includes(activeProfile.make.toLowerCase()) && !normAr.includes(normalizeArabic(activeProfile.nameAr || ''))) {
     return {
       query,
       detectedIntent,
@@ -173,8 +186,13 @@ export function retrieveVerifiedData(
     const nameMatch = q.includes(comp.name.toLowerCase()) || comp.name.toLowerCase().includes(q);
     const subMatch = comp.subsystem.toLowerCase().includes(q);
     const sympMatch = comp.symptoms.some((s) => q.includes(s.toLowerCase()) || s.toLowerCase().includes(q));
+    const analysisMatch = queryAnalysis.componentEn && (
+      comp.name.toLowerCase().includes(queryAnalysis.componentEn.toLowerCase()) ||
+      queryAnalysis.componentEn.toLowerCase().includes(comp.name.toLowerCase()) ||
+      comp.id.toLowerCase() === queryAnalysis.componentEn.toLowerCase()
+    );
 
-    if (nameMatch || (sympMatch && matchedComponents.length < 2) || (subMatch && q.length > 5)) {
+    if (nameMatch || analysisMatch || (sympMatch && matchedComponents.length < 2) || (subMatch && q.length > 5)) {
       if (!matchedComponents.some((c) => c.id === comp.id)) {
         matchedComponents.push(comp);
         sources.push({
@@ -191,8 +209,14 @@ export function retrieveVerifiedData(
   // 4. Repair Procedures Retrieval
   const matchedProcedures: RepairProcedure[] = [];
   for (const proc of REPAIR_PROCEDURES) {
-    const titleMatch = q.includes(proc.titleEn.toLowerCase()) || proc.titleEn.toLowerCase().includes(q);
-    const compMatch = q.includes(proc.component.toLowerCase()) || proc.component.toLowerCase().includes(q);
+    const titleMatch =
+      q.includes(proc.titleEn.toLowerCase()) ||
+      proc.titleEn.toLowerCase().includes(q) ||
+      (proc.titleAr && (normAr.includes(normalizeArabic(proc.titleAr)) || normalizeArabic(proc.titleAr).includes(normAr)));
+    const compMatch =
+      q.includes(proc.component.toLowerCase()) ||
+      proc.component.toLowerCase().includes(q) ||
+      (queryAnalysis.componentEn && proc.component.toLowerCase().includes(queryAnalysis.componentEn.toLowerCase()));
     const vehicleMatch =
       proc.vehicle.toLowerCase().includes(matchedProfile.model.toLowerCase()) ||
       proc.vehicleId?.toLowerCase().includes(matchedProfile.model.toLowerCase());

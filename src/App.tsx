@@ -977,6 +977,7 @@ export default function App() {
       <AutoFixAiFloatingButton
         isOpen={isAiModalOpen || currentPath === 'autofix-ai'}
         onClick={() => setIsAiModalOpen(true)}
+        lang={lang}
       />
 
       {/* AutoFix AI Modal Assistant */}

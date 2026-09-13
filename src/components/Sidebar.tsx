@@ -25,7 +25,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     'https://lh3.googleusercontent.com/aida/AEtjO1WXpXJD9ETKZOKMJuacT6FljUgBcBaSjO66BPYLG7UXu8ehW49zOlT37RSmgvAtDBuettqxjFl1tjs4DVI8sTLM7wBPOpJ6ZSIM4MrmqnCpXeHsKqpZBQ9Zq_gh-NcWTLcCCMBx5h5u_LdhYoBLmt8MM3Z9_6ApveVz6rHaEw4IgoH-565S-ZHDul1FIiudz1Y39wofQucMTgIbV3iy8TN23nsL_PgFCXV8lxN04hEid08E1cVt1fRqyw';
 
   const navItemClass = (path: NavPath) =>
-    `flex items-center justify-between px-3 py-2 rounded-lg transition-colors cursor-pointer text-xs ${
+    `flex items-center justify-between gap-2 px-3 py-2 rounded-lg transition-colors cursor-pointer text-xs min-h-[38px] min-w-0 ${
       currentPath === path
         ? 'bg-primary-container text-on-primary-container font-semibold shadow-[0_0_12px_rgba(0,240,255,0.25)]'
         : 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'

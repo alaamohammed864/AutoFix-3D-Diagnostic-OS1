@@ -217,46 +217,46 @@ export default function App() {
           <section className="w-full flex flex-col xl:flex-row xl:items-center justify-between gap-4 bg-surface-container-lowest p-4 rounded-xl shadow-lg relative overflow-hidden border border-white/5">
             <div className="absolute inset-y-0 start-0 w-1 bg-gradient-to-b from-primary-container via-secondary to-primary-fixed"></div>
 
-            <div className="flex flex-wrap items-center gap-4 sm:gap-6 ps-2">
-              <div className="flex items-center gap-3">
-                <span className="relative flex h-3 w-3">
+            <div className="flex flex-wrap items-center gap-3 sm:gap-6 ps-2 min-w-0">
+              <div className="flex items-center gap-2.5 shrink-0">
+                <span className="relative flex h-2.5 w-2.5 shrink-0">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-container opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-3 w-3 bg-primary-container shadow-[0_0_8px_#00f0ff]"></span>
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-primary-container shadow-[0_0_8px_#00f0ff]"></span>
                 </span>
-                <div className="flex flex-col">
-                  <span className="font-telemetry-label text-telemetry-label text-outline uppercase tracking-wider">
+                <div className="flex flex-col min-w-0">
+                  <span className="font-telemetry-label text-telemetry-label text-outline uppercase tracking-wider leading-tight">
                     {t.interfaceBus}
                   </span>
-                  <span className="font-code-sm text-code-sm text-on-surface font-semibold">
+                  <span className="font-code-sm text-xs text-on-surface font-semibold truncate max-w-[180px]">
                     ISO 15765-4 CAN (CAN-FD)
                   </span>
                 </div>
               </div>
 
-              <div className="h-6 w-px bg-surface-container-highest hidden sm:block"></div>
+              <div className="h-6 w-px bg-white/10 hidden md:block shrink-0"></div>
 
-              <div className="flex flex-col">
-                <span className="font-telemetry-label text-telemetry-label text-outline uppercase tracking-wider">
+              <div className="flex flex-col shrink-0 min-w-0">
+                <span className="font-telemetry-label text-telemetry-label text-outline uppercase tracking-wider leading-tight">
                   {t.baudRate}
                 </span>
-                <span className="font-code-sm text-code-sm text-secondary font-medium">
+                <span className="font-code-sm text-xs text-secondary font-medium">
                   500 kbps • 8.2 MB/s
                 </span>
               </div>
 
-              <div className="h-6 w-px bg-surface-container-highest hidden sm:block"></div>
+              <div className="h-6 w-px bg-white/10 hidden md:block shrink-0"></div>
 
-              <div className="flex flex-col">
-                <span className="font-telemetry-label text-telemetry-label text-outline uppercase tracking-wider">
+              <div className="flex flex-col shrink-0 min-w-0">
+                <span className="font-telemetry-label text-telemetry-label text-outline uppercase tracking-wider leading-tight">
                   {t.ecuPolling}
                 </span>
-                <span className="font-code-sm text-code-sm text-on-surface">{t.allOk}</span>
+                <span className="font-code-sm text-xs text-on-surface">{t.allOk}</span>
               </div>
 
-              <div className="h-6 w-px bg-surface-container-highest hidden sm:block"></div>
+              <div className="h-6 w-px bg-white/10 hidden md:block shrink-0"></div>
 
-              <div className="flex flex-col">
-                <span className="font-telemetry-label text-telemetry-label text-outline uppercase tracking-wider">
+              <div className="flex flex-col shrink-0 min-w-0">
+                <span className="font-telemetry-label text-telemetry-label text-outline uppercase tracking-wider leading-tight">
                   {t.streamRate}
                 </span>
                 <div className="flex items-center gap-1.5">
@@ -268,36 +268,11 @@ export default function App() {
               </div>
             </div>
 
-            {/* Quick Tool Actions */}
-            <div className="flex items-center gap-3 self-end xl:self-auto">
-              <div className="inline-flex rounded-lg bg-surface-container-low p-0.5 border border-white/5">
-                <button
-                  onClick={() => setLang('en')}
-                  className={`px-3 py-1 text-xs font-code-sm font-semibold rounded transition-all cursor-pointer ${
-                    lang === 'en'
-                      ? 'bg-primary-container text-on-primary-container shadow-sm'
-                      : 'text-on-surface-variant hover:text-on-surface'
-                  }`}
-                  type="button"
-                >
-                  EN
-                </button>
-                <button
-                  onClick={() => setLang('ar')}
-                  className={`px-3 py-1 text-xs font-code-sm font-semibold rounded transition-all cursor-pointer ${
-                    lang === 'ar'
-                      ? 'bg-primary-container text-on-primary-container shadow-sm'
-                      : 'text-on-surface-variant hover:text-on-surface'
-                  }`}
-                  type="button"
-                >
-                  العربية
-                </button>
-              </div>
-
+            {/* Quick Tool Actions (Zero clutter, clean response) */}
+            <div className="flex items-center gap-2.5 self-start xl:self-auto shrink-0 flex-wrap">
               <button
                 onClick={() => setIsObdLogOpen(true)}
-                className="flex items-center gap-2 bg-surface-container hover:bg-surface-container-high text-primary-container px-3 py-1.5 rounded-lg font-code-sm text-xs transition-colors shadow-sm border border-white/5 cursor-pointer"
+                className="flex items-center gap-1.5 bg-surface-container hover:bg-surface-container-high text-primary-container px-3 py-1.5 rounded-lg font-code-sm text-xs transition-colors shadow-sm border border-white/5 cursor-pointer whitespace-nowrap"
                 type="button"
               >
                 <span className="material-symbols-outlined text-[16px]">terminal</span>
@@ -306,7 +281,7 @@ export default function App() {
 
               <button
                 onClick={() => setIsVinScannerOpen(true)}
-                className="flex items-center gap-1.5 bg-surface-container-high hover:bg-surface-bright text-on-surface px-3 py-1.5 rounded-lg font-code-sm text-xs transition-colors border border-white/5 cursor-pointer"
+                className="flex items-center gap-1.5 bg-surface-container-high hover:bg-surface-bright text-on-surface px-3 py-1.5 rounded-lg font-code-sm text-xs transition-colors border border-white/5 cursor-pointer whitespace-nowrap"
                 type="button"
               >
                 <span className="material-symbols-outlined text-[16px]">qr_code_scanner</span>
@@ -316,46 +291,47 @@ export default function App() {
           </section>
 
           {/* TOP PRIMARY NAVIGATION TABS (Dashboard vs. Vehicle Explorer vs. Diagnostic Engine) */}
-          <section className="flex flex-wrap items-center justify-between gap-2 p-2 bg-surface-container-lowest rounded-xl border border-white/5">
-            <div className="flex flex-wrap items-center gap-2">
+          <section className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-2.5 p-2 bg-surface-container-lowest rounded-xl border border-white/5 overflow-hidden">
+            {/* Scrollable / Flexible Navigation Items (Zero Collision) */}
+            <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-1.5 md:pb-0 scrollbar-none min-w-0 flex-1">
               <button
                 onClick={() => setCurrentPath('dashboard')}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-code-sm text-xs transition-all cursor-pointer ${
+                className={`shrink-0 whitespace-nowrap flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg font-code-sm text-xs transition-all cursor-pointer ${
                   currentPath === 'dashboard'
                     ? 'bg-primary-container text-on-primary-container font-bold shadow-[0_0_12px_rgba(0,240,255,0.25)]'
                     : 'text-outline hover:text-on-surface hover:bg-surface-container-high'
                 }`}
               >
-                <span className="material-symbols-outlined text-base">speed</span>
-                <span>{lang === 'ar' ? 'لوحة القياس والورشة 3D' : '3D Telemetry Dashboard'}</span>
+                <span className="material-symbols-outlined text-base shrink-0">speed</span>
+                <span>{lang === 'ar' ? 'لوحة القياس 3D' : '3D Telemetry'}</span>
               </button>
 
               <button
                 onClick={() => setCurrentPath('admin-dashboard')}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-code-sm text-xs transition-all cursor-pointer ${
+                className={`shrink-0 whitespace-nowrap flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg font-code-sm text-xs transition-all cursor-pointer ${
                   currentPath === 'admin-dashboard'
                     ? 'bg-primary text-on-primary font-bold shadow-[0_0_15px_rgba(0,240,255,0.35)]'
                     : 'bg-surface-container-high text-primary hover:text-on-surface hover:bg-surface-bright border border-primary/30'
                 }`}
               >
-                <span className="material-symbols-outlined text-base">admin_panel_settings</span>
-                <span>{lang === 'ar' ? 'لوحة المشرف وجودة البيانات' : 'Admin & Data Governance'}</span>
-                <span className="bg-primary/20 text-primary px-1.5 py-0.5 rounded text-[10px] font-bold uppercase">
+                <span className="material-symbols-outlined text-base shrink-0">admin_panel_settings</span>
+                <span>{lang === 'ar' ? 'لوحة المشرف' : 'Admin & Governance'}</span>
+                <span className="bg-primary/20 text-primary px-1.5 py-0.5 rounded text-[10px] font-bold uppercase leading-none shrink-0">
                   16 SEC
                 </span>
               </button>
 
               <button
                 onClick={() => setCurrentPath('workshop-mode')}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-code-sm text-xs transition-all cursor-pointer ${
+                className={`shrink-0 whitespace-nowrap flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg font-code-sm text-xs transition-all cursor-pointer ${
                   currentPath === 'workshop-mode'
                     ? 'bg-cyan-500 text-neutral-950 font-bold shadow-[0_0_15px_rgba(0,240,255,0.4)]'
                     : 'bg-surface-container-high text-cyan-300 hover:text-on-surface hover:bg-surface-bright border border-cyan-500/30'
                 }`}
               >
-                <span className="material-symbols-outlined text-base">precision_manufacturing</span>
+                <span className="material-symbols-outlined text-base shrink-0">precision_manufacturing</span>
                 <span>{lang === 'ar' ? 'وضع ورشة الصيانة' : 'Workshop Mode'}</span>
-                <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold uppercase ${
+                <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold uppercase leading-none shrink-0 ${
                   currentPath === 'workshop-mode' ? 'bg-black/20 text-neutral-950' : 'bg-cyan-500/20 text-cyan-300'
                 }`}>
                   STATION
@@ -364,31 +340,31 @@ export default function App() {
 
               <button
                 onClick={() => setCurrentPath('live-dtc-scanner')}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-code-sm text-xs transition-all cursor-pointer ${
+                className={`shrink-0 whitespace-nowrap flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg font-code-sm text-xs transition-all cursor-pointer ${
                   currentPath === 'live-dtc-scanner'
                     ? 'bg-error-container text-on-error-container font-bold shadow-[0_0_12px_rgba(255,84,73,0.3)]'
                     : 'text-outline hover:text-on-surface hover:bg-surface-container-high'
                 }`}
               >
-                <span className="material-symbols-outlined text-base">warning</span>
-                <span>{lang === 'ar' ? 'فاحص الأعطال وترابط الأكواد' : 'OBD-II / DTC Suite'}</span>
-                <span className="bg-error-container/50 text-on-error-container px-1.5 py-0.5 rounded text-[10px] font-bold">
+                <span className="material-symbols-outlined text-base shrink-0">warning</span>
+                <span>{lang === 'ar' ? 'فاحص الأعطال' : 'OBD-II / DTC'}</span>
+                <span className="bg-error-container/50 text-on-error-container px-1.5 py-0.5 rounded text-[10px] font-bold leading-none shrink-0">
                   DTC
                 </span>
               </button>
 
               <button
                 onClick={() => setCurrentPath('vehicle-explorer')}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-code-sm text-xs transition-all cursor-pointer ${
+                className={`shrink-0 whitespace-nowrap flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg font-code-sm text-xs transition-all cursor-pointer ${
                   currentPath === 'vehicle-explorer'
                     ? 'bg-primary-container text-on-primary-container font-bold shadow-[0_0_12px_rgba(0,240,255,0.25)]'
                     : 'text-outline hover:text-on-surface hover:bg-surface-container-high'
                 }`}
               >
-                <span className="material-symbols-outlined text-base">directions_car</span>
-                <span>{lang === 'ar' ? 'مستكشف المركبات الذكي (7 خطوات)' : 'Vehicle Explorer & Profiles (7 Steps)'}</span>
-                <span className="bg-surface-container-high text-secondary px-1.5 py-0.5 rounded text-[10px] font-bold">
-                  Wizard
+                <span className="material-symbols-outlined text-base shrink-0">directions_car</span>
+                <span>{lang === 'ar' ? 'مستكشف المركبات' : 'Vehicle Explorer'}</span>
+                <span className="bg-surface-container-high text-secondary px-1.5 py-0.5 rounded text-[10px] font-bold leading-none shrink-0">
+                  7 Steps
                 </span>
               </button>
 
@@ -397,41 +373,41 @@ export default function App() {
                   setDiagnosticInitialSymptom("Engine cranks but doesn't start");
                   setIsDiagnosticEngineOpen(true);
                 }}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg font-code-sm text-xs transition-all cursor-pointer bg-surface-container-high hover:bg-primary-container hover:text-on-primary-container text-primary-container font-bold border border-primary-container/30 shadow-sm"
+                className="shrink-0 whitespace-nowrap flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg font-code-sm text-xs transition-all cursor-pointer bg-surface-container-high hover:bg-primary-container hover:text-on-primary-container text-primary-container font-bold border border-primary-container/30 shadow-sm"
               >
-                <span className="material-symbols-outlined text-base">account_tree</span>
-                <span>{lang === 'ar' ? 'محرك التشخيص الذكي' : 'Diagnostic Engine'}</span>
-                <span className="bg-primary-container/20 text-primary-container px-1.5 py-0.5 rounded text-[10px] font-bold uppercase">
+                <span className="material-symbols-outlined text-base shrink-0">account_tree</span>
+                <span>{lang === 'ar' ? 'محرك التشخيص' : 'Diagnostic Flow'}</span>
+                <span className="bg-primary-container/20 text-primary-container px-1.5 py-0.5 rounded text-[10px] font-bold uppercase leading-none shrink-0">
                   Flow
                 </span>
               </button>
 
               <button
                 onClick={() => setCurrentPath('autofix-ai')}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-code-sm text-xs transition-all cursor-pointer ${
+                className={`shrink-0 whitespace-nowrap flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg font-code-sm text-xs transition-all cursor-pointer ${
                   currentPath === 'autofix-ai'
                     ? 'bg-primary-container text-on-primary-container font-bold shadow-[0_0_12px_rgba(0,240,255,0.25)]'
                     : 'text-primary-container hover:text-on-surface hover:bg-surface-container-high border border-primary-container/30'
                 }`}
               >
-                <span className="material-symbols-outlined text-base animate-pulse">auto_awesome</span>
+                <span className="material-symbols-outlined text-base animate-pulse shrink-0">auto_awesome</span>
                 <span>AutoFix AI</span>
-                <span className="bg-primary-container/20 text-primary-container px-1.5 py-0.5 rounded text-[10px] font-bold uppercase">
+                <span className="bg-primary-container/20 text-primary-container px-1.5 py-0.5 rounded text-[10px] font-bold uppercase leading-none shrink-0">
                   COPILOT
                 </span>
               </button>
 
               <button
                 onClick={() => setCurrentPath('tools-torque')}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-code-sm text-xs transition-all cursor-pointer ${
+                className={`shrink-0 whitespace-nowrap flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg font-code-sm text-xs transition-all cursor-pointer ${
                   currentPath === 'tools-torque'
                     ? 'bg-amber-500 text-neutral-950 font-bold shadow-[0_0_12px_rgba(245,158,11,0.35)]'
                     : 'text-amber-300 hover:text-on-surface hover:bg-surface-container-high border border-amber-500/30'
                 }`}
               >
-                <span className="material-symbols-outlined text-base">calculate</span>
-                <span>{lang === 'ar' ? 'أدوات وحاسبات السيارات' : 'Calculators & Tools'}</span>
-                <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold uppercase ${
+                <span className="material-symbols-outlined text-base shrink-0">calculate</span>
+                <span>{lang === 'ar' ? 'الحاسبات' : 'Calculators'}</span>
+                <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold uppercase leading-none shrink-0 ${
                   currentPath === 'tools-torque' ? 'bg-black/20 text-neutral-950' : 'bg-amber-500/20 text-amber-300'
                 }`}>
                   13
@@ -440,29 +416,30 @@ export default function App() {
 
               <button
                 onClick={() => setCurrentPath('electrical-wiring')}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-code-sm text-xs transition-all cursor-pointer ${
+                className={`shrink-0 whitespace-nowrap flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg font-code-sm text-xs transition-all cursor-pointer ${
                   currentPath === 'electrical-wiring'
                     ? 'bg-amber-400 text-neutral-950 font-bold shadow-[0_0_12px_rgba(251,191,36,0.35)]'
                     : 'text-amber-300 hover:text-on-surface hover:bg-surface-container-high border border-amber-400/30'
                 }`}
               >
-                <span className="material-symbols-outlined text-base">schema</span>
-                <span>{lang === 'ar' ? 'مستكشف الدوائر والأسلاك' : 'Electrical Wiring'}</span>
-                <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold uppercase ${
+                <span className="material-symbols-outlined text-base shrink-0">schema</span>
+                <span>{lang === 'ar' ? 'الأسلاك' : 'Wiring'}</span>
+                <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold uppercase leading-none shrink-0 ${
                   currentPath === 'electrical-wiring' ? 'bg-black/20 text-neutral-950' : 'bg-amber-400/20 text-amber-300'
                 }`}>
                   10 SYS
                 </span>
               </button>
+
               <button
                 onClick={() => setIsSecurityHubOpen(true)}
-                className="flex items-center gap-2 px-3.5 py-2 rounded-lg font-code-sm text-xs transition-all cursor-pointer bg-surface-container-high hover:bg-surface-bright text-emerald-300 border border-emerald-500/40 shadow-sm"
+                className="shrink-0 whitespace-nowrap flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg font-code-sm text-xs transition-all cursor-pointer bg-surface-container-high hover:bg-surface-bright text-emerald-300 border border-emerald-500/40 shadow-sm"
                 type="button"
                 title="Open Production Security, RBAC & Audit Trail Center"
               >
-                <span className="material-symbols-outlined text-base text-emerald-400">shield</span>
-                <span className="font-bold">{lang === 'ar' ? 'مركز الأمان والصلاحيات' : 'Security & RBAC'}</span>
-                <span className="bg-emerald-500/20 text-emerald-300 px-1.5 py-0.5 rounded text-[10px] font-bold uppercase border border-emerald-500/30">
+                <span className="material-symbols-outlined text-base text-emerald-400 shrink-0">shield</span>
+                <span className="font-bold">{lang === 'ar' ? 'الأمان' : 'Security'}</span>
+                <span className="bg-emerald-500/20 text-emerald-300 px-1.5 py-0.5 rounded text-[10px] font-bold uppercase border border-emerald-500/30 leading-none shrink-0">
                   DEFENSES
                 </span>
               </button>
@@ -470,28 +447,34 @@ export default function App() {
               {/* State Simulators Quick Dropdown / Buttons for QA */}
               <button
                 onClick={() => setCurrentPath('404')}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg font-code-sm text-[11px] text-outline hover:text-on-surface hover:bg-surface-container transition-colors cursor-pointer border border-white/5"
+                className="shrink-0 whitespace-nowrap flex items-center gap-1 px-2 py-1.5 rounded-lg font-code-sm text-[11px] text-outline hover:text-on-surface hover:bg-surface-container transition-colors cursor-pointer border border-white/5"
                 type="button"
                 title="Test 404 Not Found Page"
               >
-                <span className="material-symbols-outlined text-xs">find_in_page</span>
-                <span>404 View</span>
+                <span className="material-symbols-outlined text-xs shrink-0">find_in_page</span>
+                <span>404</span>
               </button>
 
               <button
                 onClick={() => setCurrentPath('500')}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg font-code-sm text-[11px] text-outline hover:text-rose-400 hover:bg-surface-container transition-colors cursor-pointer border border-white/5"
+                className="shrink-0 whitespace-nowrap flex items-center gap-1 px-2 py-1.5 rounded-lg font-code-sm text-[11px] text-outline hover:text-rose-400 hover:bg-surface-container transition-colors cursor-pointer border border-white/5"
                 type="button"
                 title="Test 500 Server Error Page (Masked Stack Trace)"
               >
-                <span className="material-symbols-outlined text-xs">gpp_maybe</span>
-                <span>500 View</span>
+                <span className="material-symbols-outlined text-xs shrink-0">gpp_maybe</span>
+                <span>500</span>
               </button>
             </div>
 
-            <div className="hidden sm:flex items-center gap-2 text-xs font-code-sm text-outline pe-2">
-              <span className="material-symbols-outlined text-sm text-secondary">verified</span>
-              <span>Active: {activeVehicleProfile.year} {activeVehicleProfile.make} {activeVehicleProfile.model}</span>
+            {/* Active Vehicle Status Badge - Non-Colliding, Truncated */}
+            <div className="hidden lg:flex items-center gap-2 text-xs font-code-sm bg-surface-container-low px-3 py-1.5 rounded-lg border border-white/5 shrink-0 min-w-0 max-w-[280px]">
+              <span className="material-symbols-outlined text-sm text-secondary shrink-0">verified</span>
+              <span
+                className="text-on-surface font-medium truncate"
+                title={`Active: ${activeVehicleProfile.year} ${activeVehicleProfile.make} ${activeVehicleProfile.model}`}
+              >
+                {activeVehicleProfile.year} {activeVehicleProfile.make} {activeVehicleProfile.model}
+              </span>
             </div>
           </section>
 
@@ -687,11 +670,11 @@ export default function App() {
             {/* Cascade Controls */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
               {/* Make Pill Filter */}
-              <div className="flex flex-col gap-1.5">
-                <label className="font-telemetry-label text-telemetry-label text-outline uppercase">
+              <div className="flex flex-col gap-1.5 min-w-0">
+                <label className="font-telemetry-label text-telemetry-label text-outline uppercase truncate">
                   {t.make}
                 </label>
-                <div className="relative">
+                <div className="relative min-w-0">
                   <select
                     value={
                       currentVehicle.make.includes('Porsche')
@@ -707,7 +690,7 @@ export default function App() {
                         : 'porsche992'
                     }
                     onChange={(e) => handleVehicleChange(e.target.value)}
-                    className="w-full bg-surface-container-low text-primary-container font-code-sm text-xs rounded-lg px-3 py-2.5 appearance-none focus:outline-none focus:bg-surface-container-high cursor-pointer font-semibold border border-white/5"
+                    className="w-full bg-surface-container-low text-primary-container font-code-sm text-xs rounded-lg px-3 py-2.5 pe-8 appearance-none focus:outline-none focus:bg-surface-container-high cursor-pointer font-semibold border border-white/5 truncate"
                   >
                     <option value="porsche992">Porsche (992)</option>
                     <option value="bmwM3">BMW (G80/G82)</option>
@@ -722,12 +705,12 @@ export default function App() {
               </div>
 
               {/* Model */}
-              <div className="flex flex-col gap-1.5">
-                <label className="font-telemetry-label text-telemetry-label text-outline uppercase">
+              <div className="flex flex-col gap-1.5 min-w-0">
+                <label className="font-telemetry-label text-telemetry-label text-outline uppercase truncate">
                   {t.model}
                 </label>
-                <div className="relative">
-                  <select className="w-full bg-surface-container-low text-on-surface font-code-sm text-xs rounded-lg px-3 py-2.5 appearance-none focus:outline-none focus:bg-surface-container-high cursor-pointer border border-white/5">
+                <div className="relative min-w-0">
+                  <select className="w-full bg-surface-container-low text-on-surface font-code-sm text-xs rounded-lg px-3 py-2.5 pe-8 appearance-none focus:outline-none focus:bg-surface-container-high cursor-pointer border border-white/5 truncate">
                     <option>{currentVehicle.model}</option>
                   </select>
                   <span className="material-symbols-outlined absolute end-2.5 top-2.5 text-outline pointer-events-none text-sm">
@@ -737,12 +720,12 @@ export default function App() {
               </div>
 
               {/* Year */}
-              <div className="flex flex-col gap-1.5">
-                <label className="font-telemetry-label text-telemetry-label text-outline uppercase">
+              <div className="flex flex-col gap-1.5 min-w-0">
+                <label className="font-telemetry-label text-telemetry-label text-outline uppercase truncate">
                   {t.modelYear}
                 </label>
-                <div className="relative">
-                  <select className="w-full bg-surface-container-low text-on-surface font-code-sm text-xs rounded-lg px-3 py-2.5 appearance-none focus:outline-none focus:bg-surface-container-high cursor-pointer border border-white/5">
+                <div className="relative min-w-0">
+                  <select className="w-full bg-surface-container-low text-on-surface font-code-sm text-xs rounded-lg px-3 py-2.5 pe-8 appearance-none focus:outline-none focus:bg-surface-container-high cursor-pointer border border-white/5 truncate">
                     <option>{currentVehicle.year}</option>
                   </select>
                   <span className="material-symbols-outlined absolute end-2.5 top-2.5 text-outline pointer-events-none text-sm">
@@ -752,12 +735,12 @@ export default function App() {
               </div>
 
               {/* Engine */}
-              <div className="flex flex-col gap-1.5">
-                <label className="font-telemetry-label text-telemetry-label text-outline uppercase">
+              <div className="flex flex-col gap-1.5 min-w-0">
+                <label className="font-telemetry-label text-telemetry-label text-outline uppercase truncate">
                   {t.powertrain}
                 </label>
-                <div className="relative">
-                  <select className="w-full bg-surface-container-low text-on-surface font-code-sm text-xs rounded-lg px-3 py-2.5 appearance-none focus:outline-none focus:bg-surface-container-high cursor-pointer border border-white/5">
+                <div className="relative min-w-0">
+                  <select className="w-full bg-surface-container-low text-on-surface font-code-sm text-xs rounded-lg px-3 py-2.5 pe-8 appearance-none focus:outline-none focus:bg-surface-container-high cursor-pointer border border-white/5 truncate">
                     <option>{currentVehicle.powertrain}</option>
                   </select>
                   <span className="material-symbols-outlined absolute end-2.5 top-2.5 text-outline pointer-events-none text-sm">
@@ -767,12 +750,12 @@ export default function App() {
               </div>
 
               {/* Trim / Drivetrain */}
-              <div className="flex flex-col gap-1.5">
-                <label className="font-telemetry-label text-telemetry-label text-outline uppercase">
+              <div className="flex flex-col gap-1.5 min-w-0">
+                <label className="font-telemetry-label text-telemetry-label text-outline uppercase truncate">
                   {t.drivetrain}
                 </label>
-                <div className="relative">
-                  <select className="w-full bg-surface-container-low text-on-surface font-code-sm text-xs rounded-lg px-3 py-2.5 appearance-none focus:outline-none focus:bg-surface-container-high cursor-pointer border border-white/5">
+                <div className="relative min-w-0">
+                  <select className="w-full bg-surface-container-low text-on-surface font-code-sm text-xs rounded-lg px-3 py-2.5 pe-8 appearance-none focus:outline-none focus:bg-surface-container-high cursor-pointer border border-white/5 truncate">
                     <option>{currentVehicle.drivetrain}</option>
                   </select>
                   <span className="material-symbols-outlined absolute end-2.5 top-2.5 text-outline pointer-events-none text-sm">
@@ -782,12 +765,12 @@ export default function App() {
               </div>
 
               {/* Transmission */}
-              <div className="flex flex-col gap-1.5">
-                <label className="font-telemetry-label text-telemetry-label text-outline uppercase">
+              <div className="flex flex-col gap-1.5 min-w-0">
+                <label className="font-telemetry-label text-telemetry-label text-outline uppercase truncate">
                   {t.gearbox}
                 </label>
-                <div className="relative">
-                  <select className="w-full bg-surface-container-low text-on-surface font-code-sm text-xs rounded-lg px-3 py-2.5 appearance-none focus:outline-none focus:bg-surface-container-high cursor-pointer border border-white/5">
+                <div className="relative min-w-0">
+                  <select className="w-full bg-surface-container-low text-on-surface font-code-sm text-xs rounded-lg px-3 py-2.5 pe-8 appearance-none focus:outline-none focus:bg-surface-container-high cursor-pointer border border-white/5 truncate">
                     <option>{currentVehicle.gearbox}</option>
                   </select>
                   <span className="material-symbols-outlined absolute end-2.5 top-2.5 text-outline pointer-events-none text-sm">
@@ -797,25 +780,22 @@ export default function App() {
               </div>
             </div>
 
-            {/* Quick Spec Tag Strip & Workspace CTA */}
-            <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 pt-3 bg-surface-container-low/60 p-4 rounded-lg border border-white/5">
-              <div className="flex flex-wrap items-center gap-y-2 gap-x-4 font-code-sm text-xs text-on-surface-variant">
-                <div className="flex items-center gap-1.5">
+            {/* Quick Spec Tag Strip & Workspace CTA (Zero Collision, Discrete Unit Badges) */}
+            <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 pt-3 bg-surface-container-low/60 p-3 sm:p-4 rounded-lg border border-white/5">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 font-code-sm text-xs text-on-surface-variant">
+                <div className="flex items-center gap-1.5 bg-surface-container-lowest/80 px-2.5 py-1.5 rounded-lg border border-white/5 shrink-0">
                   <span className="text-outline">Displacement:</span>
                   <span className="text-on-surface font-semibold">{currentVehicle.displacement}</span>
                 </div>
-                <span className="text-surface-container-highest">•</span>
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-1.5 bg-surface-container-lowest/80 px-2.5 py-1.5 rounded-lg border border-white/5 shrink-0">
                   <span className="text-outline">Engine Oil:</span>
                   <span className="text-primary font-semibold">{currentVehicle.engineOil}</span>
                 </div>
-                <span className="text-surface-container-highest">•</span>
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-1.5 bg-surface-container-lowest/80 px-2.5 py-1.5 rounded-lg border border-white/5 shrink-0">
                   <span className="text-outline">Spark Gap:</span>
                   <span className="text-on-surface font-semibold">{currentVehicle.sparkGap}</span>
                 </div>
-                <span className="text-surface-container-highest">•</span>
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-1.5 bg-surface-container-lowest/80 px-2.5 py-1.5 rounded-lg border border-white/5 shrink-0">
                   <span className="text-outline">Wheel Bolt Torque:</span>
                   <span className="text-secondary-fixed-dim font-semibold">
                     {currentVehicle.wheelBoltTorque}
@@ -828,7 +808,7 @@ export default function App() {
                   setCurrentPath('3d-telemetry-cad');
                   window.scrollTo({ top: 400, behavior: 'smooth' });
                 }}
-                className="bg-primary-container hover:bg-primary-fixed-dim text-on-primary-container px-5 py-2.5 rounded-lg font-code-sm text-xs font-bold transition-all shadow-[0_0_20px_rgba(0,240,255,0.35)] flex items-center justify-center gap-2 shrink-0 cursor-pointer"
+                className="bg-primary-container hover:bg-primary-fixed-dim text-on-primary-container px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg font-code-sm text-xs font-bold transition-all shadow-[0_0_20px_rgba(0,240,255,0.35)] flex items-center justify-center gap-2 shrink-0 cursor-pointer"
                 type="button"
               >
                 <span className="material-symbols-outlined text-base">rocket_launch</span>
